@@ -216,6 +216,8 @@ extern "C" {
 
     pub fn X509_NAME_new() -> *mut X509_NAME;
     pub fn X509_NAME_free(x: *mut X509_NAME);
+    pub fn d2i_X509_NAME(a: *mut *mut X509_NAME, pp: *mut *const c_uchar, length: c_long) -> *mut X509_NAME;
+    pub fn i2d_X509_NAME(x: *mut X509_NAME, buf: *mut *mut u8) -> c_int;
 
     pub fn X509_new() -> *mut X509;
     pub fn X509_free(x: *mut X509);

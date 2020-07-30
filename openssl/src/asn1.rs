@@ -478,6 +478,17 @@ impl Asn1IntegerRef {
     pub fn set(&mut self, value: i32) -> Result<(), ErrorStack> {
         unsafe { cvt(::ffi::ASN1_INTEGER_set(self.as_ptr(), value as c_long)).map(|_| ()) }
     }
+
+    to_der! {
+        /// Serializes the certificate into a DER-encoded X509 structure.
+        ///
+        /// This corresponds to [`i2d_X509`].
+        ///
+        /// [`i2d_X509`]: https://www.openssl.org/docs/man1.1.0/crypto/i2d_X509.html
+        to_der,
+        ffi::i2d_ASN1_INTEGER
+    }
+
 }
 
 foreign_type_and_impl_send_sync! {
