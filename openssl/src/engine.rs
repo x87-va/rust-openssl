@@ -1,21 +1,19 @@
 use std::ffi::{CString, CStr};
+use std::ptr;
+use std::fmt;
 
 use libc::{c_uint, c_int};
 
 use ffi;
+use foreign_types::ForeignType;
 
 use {cvt_p, cvt};
+
+use pkey::{PKey, Private, Public};
 
 use error::ErrorStack;
 
 pub struct Engine(*mut ffi::ENGINE);
-
-// impl Debug for Engine {
-
-//     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-
-//     }
-// }
 
 impl Engine {
 
@@ -62,7 +60,29 @@ impl Engine {
         unsafe {
             cvt(ffi::ENGINE_ctrl_cmd_string(self.0, cmd_name.as_ptr(), cmd_arg.as_ptr(), cmd_optional as c_int)).map(|_| ())
         }
-    }   
+    }
+
+    pub fn load_private_key(&mut self, id: &str) -> Result<PKey<Private>, ErrorStack> {
+        let key_id = CString::new(id).unwrap();
+
+        let ui_method = ptr::null_mut();
+        let callback_data = ptr::null_mut();
+
+        unsafe {
+            cvt_p(ffi::ENGINE_load_private_key(self.0, key_id.as_ptr(), ui_method, callback_data)).map(|p| PKey::from_ptr(p))
+        }        
+    }
+
+    pub fn load_public_key(&mut self, id: &str) -> Result<PKey<Public>, ErrorStack> {
+        let key_id = CString::new(id).unwrap();
+
+        let ui_method = ptr::null_mut();
+        let callback_data = ptr::null_mut();
+
+        unsafe {
+            cvt_p(ffi::ENGINE_load_public_key(self.0, key_id.as_ptr(), ui_method, callback_data)).map(|p| PKey::from_ptr(p))
+        }        
+    }
 
     pub fn finish(&mut self) -> Result<(), ErrorStack> {
         unsafe {
@@ -76,6 +96,13 @@ impl Engine {
         }
     }
 
+}
+
+impl fmt::Debug for Engine {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "Engine{{id: {}}}", self.get_id())
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -126,7 +153,7 @@ mod tests {
         let mut result2 = engine.init();
         assert!(result2.is_ok());
 
-        result2 = engine.set_default(EngineMethod::ALL);
+        result2 = engine.set_default(EngineMethod::RAND);
         assert!(result2.is_ok());
 
         result2 = engine.finish();
@@ -135,4 +162,5 @@ mod tests {
         result2 = engine.free();
         assert!(result2.is_ok());
     }
+
 }

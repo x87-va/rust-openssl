@@ -32,8 +32,8 @@ extern "C" {
 
 	pub fn ENGINE_ctrl_cmd_string(engine: *mut ENGINE, cmd_name: *const c_char, arg: *const c_char, cmd_optional: c_int) -> c_int;
 
-	// pub fn ENGINE_load_private_key(engine: *mut ENGINE, key_id: *const c_char, ui_method: *mut UI_METHOD, callback_data: *mut c_void) -> *mut EVP_PKEY;
+	pub fn ENGINE_load_private_key(engine: *mut ENGINE, key_id: *const c_char, ui_method: *mut UI_METHOD, callback_data: *mut c_void) -> *mut EVP_PKEY;
 
-	// pub fn ENGINE_load_public_key(engine: *mut ENGINE, key_id: *const c_char, ui_method: *mut UI_METHOD, callback_data: *mut c_void) -> *mut EVP_PKEY;
+	pub fn ENGINE_load_public_key(engine: *mut ENGINE, key_id: *const c_char, ui_method: *mut UI_METHOD, callback_data: *mut c_void) -> *mut EVP_PKEY;
 
 }
