@@ -1,12 +1,11 @@
-extern crate ctest;
-
 use std::env;
 
+#[allow(clippy::inconsistent_digit_grouping, clippy::unusual_byte_groupings)]
 #[path = "../openssl-sys/build/cfgs.rs"]
 mod cfgs;
 
 fn main() {
-    let mut cfg = ctest::TestGenerator::new();
+    let mut cfg = ctest2::TestGenerator::new();
     let target = env::var("TARGET").unwrap();
 
     if let Ok(out) = env::var("DEP_OPENSSL_INCLUDE") {

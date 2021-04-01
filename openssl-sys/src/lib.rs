@@ -1,6 +1,7 @@
 #![allow(
     clippy::missing_safety_doc,
     clippy::unreadable_literal,
+    clippy::upper_case_acronyms,
     dead_code,
     non_camel_case_types,
     non_snake_case,
@@ -9,6 +10,7 @@
     unused_imports
 )]
 #![doc(html_root_url = "https://docs.rs/openssl-sys/0.9")]
+#![recursion_limit = "128"] // configure fixed limit across all rust versions
 
 extern crate libc;
 
@@ -105,8 +107,13 @@ pub fn init() {
     // explicitly initialize to work around https://github.com/openssl/openssl/issues/3505
     static INIT: Once = Once::new();
 
+    #[cfg(not(ossl111b))]
+    let init_options = OPENSSL_INIT_LOAD_SSL_STRINGS;
+    #[cfg(ossl111b)]
+    let init_options = OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_NO_ATEXIT;
+
     INIT.call_once(|| unsafe {
-        OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, ptr::null_mut());
+        OPENSSL_init_ssl(init_options, ptr::null_mut());
     })
 }
 
