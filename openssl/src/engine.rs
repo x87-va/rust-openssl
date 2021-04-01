@@ -21,8 +21,6 @@ impl Engine {
         let id = CString::new(engine_id).unwrap();
         
         unsafe {
-            ffi::init();
-
             cvt_p(ffi::ENGINE_by_id(id.as_ptr())).map(Engine)
         }
     }
@@ -139,7 +137,9 @@ mod tests {
 
     #[test]
     fn test_engine_by_id() {
-        const ENGINE_ID: &str = "rdrand";
+        ffi::init();
+
+        const ENGINE_ID: &str = "gost";
 
         let result = Engine::by_id(ENGINE_ID);
         assert!(result.is_ok());
@@ -153,7 +153,7 @@ mod tests {
         let mut result2 = engine.init();
         assert!(result2.is_ok());
 
-        result2 = engine.set_default(EngineMethod::RAND);
+        result2 = engine.set_default(EngineMethod::ALL);
         assert!(result2.is_ok());
 
         result2 = engine.finish();
