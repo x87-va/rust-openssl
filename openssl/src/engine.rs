@@ -7,11 +7,11 @@ use libc::{c_uint, c_int};
 use ffi;
 use foreign_types::ForeignType;
 
-use {cvt_p, cvt};
+use crate::{cvt_p, cvt};
 
-use pkey::{PKey, Private, Public};
+use crate::pkey::{PKey, Private, Public};
 
-use error::ErrorStack;
+use crate::error::ErrorStack;
 
 pub struct Engine(*mut ffi::ENGINE);
 
@@ -100,7 +100,7 @@ impl Engine {
 
 impl fmt::Debug for Engine {
 
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "Engine{{id: {}}}", self.get_id())
     }
 }
