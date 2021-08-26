@@ -306,7 +306,6 @@ fn state() {
 /// lists of supported protocols have an overlap -- with only ONE protocol
 /// being valid for both.
 #[test]
-#[cfg_attr(libressl291, ignore)]
 fn test_connect_with_srtp_ctx() {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
@@ -365,7 +364,6 @@ fn test_connect_with_srtp_ctx() {
 /// lists of supported protocols have an overlap -- with only ONE protocol
 /// being valid for both.
 #[test]
-#[cfg_attr(libressl291, ignore)]
 fn test_connect_with_srtp_ssl() {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
@@ -1238,13 +1236,13 @@ fn stateless() {
     impl<'a> ::std::ops::Deref for Outgoing<'a> {
         type Target = [u8];
         fn deref(&self) -> &[u8] {
-            &self.0
+            self.0
         }
     }
 
     impl<'a> AsRef<[u8]> for Outgoing<'a> {
         fn as_ref(&self) -> &[u8] {
-            &self.0
+            self.0
         }
     }
 
@@ -1328,7 +1326,7 @@ fn psk_ciphers() {
     client
         .ctx()
         .set_psk_client_callback(move |_, _, identity, psk| {
-            identity[..CLIENT_IDENT.len()].copy_from_slice(&CLIENT_IDENT);
+            identity[..CLIENT_IDENT.len()].copy_from_slice(CLIENT_IDENT);
             identity[CLIENT_IDENT.len()] = 0;
             psk[..PSK.len()].copy_from_slice(PSK);
             CLIENT_CALLED.store(true, Ordering::SeqCst);
