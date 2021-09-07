@@ -1,13 +1,13 @@
-use std::ffi::{CString, CStr};
-use std::ptr;
+use std::ffi::{CStr, CString};
 use std::fmt;
+use std::ptr;
 
-use libc::{c_uint, c_int};
+use libc::{c_int, c_uint};
 
 use ffi;
 use foreign_types::ForeignType;
 
-use crate::{cvt_p, cvt};
+use crate::{cvt, cvt_p};
 
 use crate::pkey::{PKey, Private, Public};
 
@@ -16,13 +16,10 @@ use crate::error::ErrorStack;
 pub struct Engine(*mut ffi::ENGINE);
 
 impl Engine {
-
     pub fn by_id(engine_id: &str) -> Result<Engine, ErrorStack> {
         let id = CString::new(engine_id).unwrap();
-        
-        unsafe {
-            cvt_p(ffi::ENGINE_by_id(id.as_ptr())).map(Engine)
-        }
+
+        unsafe { cvt_p(ffi::ENGINE_by_id(id.as_ptr())).map(Engine) }
     }
 
     pub fn get_id(&self) -> String {
@@ -40,23 +37,30 @@ impl Engine {
     }
 
     pub fn set_default(&mut self, flags: EngineMethod) -> Result<(), ErrorStack> {
-        unsafe {
-            cvt(ffi::ENGINE_set_default(self.0, flags.0)).map(|_| ())
-        }        
+        unsafe { cvt(ffi::ENGINE_set_default(self.0, flags.0)).map(|_| ()) }
     }
 
     pub fn init(&mut self) -> Result<(), ErrorStack> {
-        unsafe {
-            cvt(ffi::ENGINE_init(self.0)).map(|_| ())
-        }
+        unsafe { cvt(ffi::ENGINE_init(self.0)).map(|_| ()) }
     }
 
-    pub fn ctrl_cmd_string(&mut self, command: &str, arg: &str, cmd_optional: i32) -> Result<(), ErrorStack> {
+    pub fn ctrl_cmd_string(
+        &mut self,
+        command: &str,
+        arg: &str,
+        cmd_optional: i32,
+    ) -> Result<(), ErrorStack> {
         let cmd_name = CString::new(command).unwrap();
         let cmd_arg = CString::new(arg).unwrap();
 
         unsafe {
-            cvt(ffi::ENGINE_ctrl_cmd_string(self.0, cmd_name.as_ptr(), cmd_arg.as_ptr(), cmd_optional as c_int)).map(|_| ())
+            cvt(ffi::ENGINE_ctrl_cmd_string(
+                self.0,
+                cmd_name.as_ptr(),
+                cmd_arg.as_ptr(),
+                cmd_optional as c_int,
+            ))
+            .map(|_| ())
         }
     }
 
@@ -67,8 +71,14 @@ impl Engine {
         let callback_data = ptr::null_mut();
 
         unsafe {
-            cvt_p(ffi::ENGINE_load_private_key(self.0, key_id.as_ptr(), ui_method, callback_data)).map(|p| PKey::from_ptr(p))
-        }        
+            cvt_p(ffi::ENGINE_load_private_key(
+                self.0,
+                key_id.as_ptr(),
+                ui_method,
+                callback_data,
+            ))
+            .map(|p| PKey::from_ptr(p))
+        }
     }
 
     pub fn load_public_key(&mut self, id: &str) -> Result<PKey<Public>, ErrorStack> {
@@ -78,26 +88,26 @@ impl Engine {
         let callback_data = ptr::null_mut();
 
         unsafe {
-            cvt_p(ffi::ENGINE_load_public_key(self.0, key_id.as_ptr(), ui_method, callback_data)).map(|p| PKey::from_ptr(p))
-        }        
+            cvt_p(ffi::ENGINE_load_public_key(
+                self.0,
+                key_id.as_ptr(),
+                ui_method,
+                callback_data,
+            ))
+            .map(|p| PKey::from_ptr(p))
+        }
     }
 
     pub fn finish(&mut self) -> Result<(), ErrorStack> {
-        unsafe {
-            cvt(ffi::ENGINE_finish(self.0)).map(|_| ())
-        }
+        unsafe { cvt(ffi::ENGINE_finish(self.0)).map(|_| ()) }
     }
 
     pub fn free(&mut self) -> Result<(), ErrorStack> {
-        unsafe {
-            cvt(ffi::ENGINE_free(self.0)).map(|_| ())
-        }
+        unsafe { cvt(ffi::ENGINE_free(self.0)).map(|_| ()) }
     }
-
 }
 
 impl fmt::Debug for Engine {
-
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "Engine{{id: {}}}", self.get_id())
     }
@@ -107,15 +117,14 @@ impl fmt::Debug for Engine {
 pub struct EngineMethod(c_uint);
 
 impl EngineMethod {
-
     pub const NONE: EngineMethod = EngineMethod(ffi::ENGINE_METHOD_NONE);
-    
+
     pub const RSA: EngineMethod = EngineMethod(ffi::ENGINE_METHOD_RSA);
-    
+
     pub const DSA: EngineMethod = EngineMethod(ffi::ENGINE_METHOD_DSA);
 
     pub const DH: EngineMethod = EngineMethod(ffi::ENGINE_METHOD_DH);
-    
+
     pub const RAND: EngineMethod = EngineMethod(ffi::ENGINE_METHOD_RAND);
 
     pub const CIPHERS: EngineMethod = EngineMethod(ffi::ENGINE_METHOD_CIPHERS);

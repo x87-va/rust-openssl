@@ -27,8 +27,8 @@ pub use dh::*;
 pub use dsa::*;
 pub use dtls1::*;
 pub use ec::*;
-pub use err::*;
 pub use engine::*;
+pub use err::*;
 pub use evp::*;
 pub use hmac::*;
 pub use obj_mac::*;
@@ -66,8 +66,8 @@ mod dh;
 mod dsa;
 mod dtls1;
 mod ec;
-mod err;
 mod engine;
+mod err;
 mod evp;
 mod hmac;
 mod obj_mac;
@@ -110,7 +110,8 @@ pub fn init() {
     #[cfg(not(ossl111b))]
     let init_options = OPENSSL_INIT_LOAD_SSL_STRINGS;
     #[cfg(ossl111b)]
-    let init_options = OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_NO_ATEXIT | OPENSSL_INIT_ENGINE_DYNAMIC;
+    let init_options =
+        OPENSSL_INIT_LOAD_SSL_STRINGS | OPENSSL_INIT_NO_ATEXIT | OPENSSL_INIT_ENGINE_DYNAMIC;
 
     INIT.call_once(|| unsafe {
         OPENSSL_init_ssl(init_options, ptr::null_mut());
