@@ -47,20 +47,36 @@ impl Engine {
     pub fn ctrl_cmd_string(
         &mut self,
         command: &str,
-        arg: &str,
+        arg: Option<&str>,
         cmd_optional: i32,
     ) -> Result<(), ErrorStack> {
         let cmd_name = CString::new(command).unwrap();
-        let cmd_arg = CString::new(arg).unwrap();
 
-        unsafe {
-            cvt(ffi::ENGINE_ctrl_cmd_string(
-                self.0,
-                cmd_name.as_ptr(),
-                cmd_arg.as_ptr(),
-                cmd_optional as c_int,
-            ))
-            .map(|_| ())
+        match arg {
+            Some(value) => {
+                let cmd_arg = CString::new(value).unwrap();
+
+                unsafe {
+                    cvt(ffi::ENGINE_ctrl_cmd_string(
+                        self.0,
+                        cmd_name.as_ptr(),
+                        cmd_arg.as_ptr(),
+                        cmd_optional as c_int,
+                    ))
+                    .map(|_| ())
+                }
+            },
+            None => {
+                unsafe {
+                    cvt(ffi::ENGINE_ctrl_cmd_string(
+                        self.0,
+                        cmd_name.as_ptr(),
+                        ptr::null(),
+                        cmd_optional as c_int,
+                    ))
+                    .map(|_| ())
+                }
+            }
         }
     }
 
