@@ -1415,6 +1415,8 @@ const_ptr_api! {
 
 #[cfg(ossl110)]
 pub const OPENSSL_INIT_LOAD_SSL_STRINGS: u64 = 0x00200000;
+#[cfg(ossl110)]
+pub const OPENSSL_INIT_ENGINE_DYNAMIC: u64 = 0x00000400;
 #[cfg(ossl111b)]
 pub const OPENSSL_INIT_NO_ATEXIT: u64 = 0x00080000;
 
