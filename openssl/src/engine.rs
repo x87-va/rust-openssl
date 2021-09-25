@@ -113,6 +113,13 @@ impl fmt::Debug for Engine {
     }
 }
 
+impl Drop for Engine {
+    fn drop(&mut self) {
+        self.finish().unwrap();
+        self.free().unwrap();
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct EngineMethod(c_uint);
 
@@ -148,7 +155,7 @@ mod tests {
     fn test_engine_by_id() {
         ffi::init();
 
-        const ENGINE_ID: &str = "gost";
+        const ENGINE_ID: &str = "rdrand";
 
         let result = Engine::by_id(ENGINE_ID);
         assert!(result.is_ok());
@@ -164,12 +171,5 @@ mod tests {
 
         result2 = engine.set_default(EngineMethod::ALL);
         assert!(result2.is_ok());
-
-        result2 = engine.finish();
-        assert!(result2.is_ok());
-
-        result2 = engine.free();
-        assert!(result2.is_ok());
     }
-
 }
