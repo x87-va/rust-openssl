@@ -87,6 +87,10 @@ impl Id {
     pub const X25519: Id = Id(ffi::EVP_PKEY_X25519);
     #[cfg(ossl111)]
     pub const X448: Id = Id(ffi::EVP_PKEY_X448);
+    #[cfg(ossl111)]
+    pub const GOST3410_2012_256: Id = Id(ffi::NID_id_GostR3410_2012_256);
+    #[cfg(ossl111)]
+    pub const GOST3410_2012_512: Id = Id(ffi::NID_id_GostR3410_2012_512);
 
     /// Creates a `Id` from an integer representation.
     pub fn from_raw(value: c_int) -> Id {
