@@ -1,4 +1,4 @@
-#![allow(clippy::inconsistent_digit_grouping)]
+#![allow(clippy::inconsistent_digit_grouping, clippy::unusual_byte_groupings)]
 
 use std::env;
 
@@ -35,6 +35,9 @@ fn main() {
         if version >= 0x1_01_01_00_0 {
             println!("cargo:rustc-cfg=ossl111");
         }
+        if version >= 0x3_00_00_00_0 {
+            println!("cargo:rustc-cfg=ossl300");
+        }
     }
 
     if let Ok(version) = env::var("DEP_OPENSSL_LIBRESSL_VERSION_NUMBER") {
@@ -62,6 +65,18 @@ fn main() {
 
         if version >= 0x2_09_01_00_0 {
             println!("cargo:rustc-cfg=libressl291");
+        }
+
+        if version >= 0x3_02_01_00_0 {
+            println!("cargo:rustc-cfg=libressl321");
+        }
+
+        if version >= 0x3_03_02_00_0 {
+            println!("cargo:rustc-cfg=libressl332");
+        }
+
+        if version >= 0x3_04_00_00_0 {
+            println!("cargo:rustc-cfg=libressl340");
         }
     }
 }

@@ -1,12 +1,11 @@
-extern crate ctest;
-
 use std::env;
 
+#[allow(clippy::inconsistent_digit_grouping, clippy::unusual_byte_groupings)]
 #[path = "../openssl-sys/build/cfgs.rs"]
 mod cfgs;
 
 fn main() {
-    let mut cfg = ctest::TestGenerator::new();
+    let mut cfg = ctest2::TestGenerator::new();
     let target = env::var("TARGET").unwrap();
 
     if let Ok(out) = env::var("DEP_OPENSSL_INCLUDE") {
@@ -110,6 +109,7 @@ fn main() {
             s.starts_with("PEM_read_bio_") ||
             (s.starts_with("PEM_write_bio_") && s.ends_with("PrivateKey")) ||
             s == "d2i_PKCS8PrivateKey_bio" ||
+            s == "i2d_PKCS8PrivateKey_bio" ||
             s == "SSL_get_ex_new_index" ||
             s == "SSL_CTX_get_ex_new_index" ||
             s == "CRYPTO_get_ex_new_index"

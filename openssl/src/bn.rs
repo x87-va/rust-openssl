@@ -22,7 +22,7 @@
 //! ```
 //!
 //! [`BIGNUM`]: https://wiki.openssl.org/index.php/Manual:Bn_internal(3)
-use ffi;
+use cfg_if::cfg_if;
 use foreign_types::{ForeignType, ForeignTypeRef};
 use libc::c_int;
 use std::cmp::Ordering;
@@ -30,10 +30,10 @@ use std::ffi::CString;
 use std::ops::{Add, Deref, Div, Mul, Neg, Rem, Shl, Shr, Sub};
 use std::{fmt, ptr};
 
-use asn1::Asn1Integer;
-use error::ErrorStack;
-use string::OpensslString;
-use {cvt, cvt_n, cvt_p};
+use crate::asn1::Asn1Integer;
+use crate::error::ErrorStack;
+use crate::string::OpensslString;
+use crate::{cvt, cvt_n, cvt_p};
 
 cfg_if! {
     if #[cfg(ossl110)] {
@@ -114,13 +114,13 @@ foreign_type_and_impl_send_sync! {
     type CType = ffi::BIGNUM;
     fn drop = ffi::BN_free;
 
-    /// Dynamically sized large number impelementation
+    /// Dynamically sized large number implementation
     ///
     /// Perform large number mathematics.  Create a new BigNum
     /// with [`new`].  Perform standard mathematics on large numbers using
     /// methods from [`Dref<Target = BigNumRef>`]
     ///
-    /// OpenSSL documenation at [`BN_new`].
+    /// OpenSSL documentation at [`BN_new`].
     ///
     /// [`new`]: struct.BigNum.html#method.new
     /// [`Dref<Target = BigNumRef>`]: struct.BigNum.html#deref-methods
@@ -1122,7 +1122,7 @@ impl BigNum {
 }
 
 impl fmt::Debug for BigNumRef {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.to_dec_str() {
             Ok(s) => f.write_str(&s),
             Err(e) => Err(e.into()),
@@ -1131,7 +1131,7 @@ impl fmt::Debug for BigNumRef {
 }
 
 impl fmt::Debug for BigNum {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.to_dec_str() {
             Ok(s) => f.write_str(&s),
             Err(e) => Err(e.into()),
@@ -1140,7 +1140,7 @@ impl fmt::Debug for BigNum {
 }
 
 impl fmt::Display for BigNumRef {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.to_dec_str() {
             Ok(s) => f.write_str(&s),
             Err(e) => Err(e.into()),
@@ -1149,7 +1149,7 @@ impl fmt::Display for BigNumRef {
 }
 
 impl fmt::Display for BigNum {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.to_dec_str() {
             Ok(s) => f.write_str(&s),
             Err(e) => Err(e.into()),
@@ -1376,7 +1376,7 @@ impl Neg for BigNum {
 
 #[cfg(test)]
 mod tests {
-    use bn::{BigNum, BigNumContext};
+    use crate::bn::{BigNum, BigNumContext};
 
     #[test]
     fn test_to_from_slice() {
