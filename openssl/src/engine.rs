@@ -36,16 +36,16 @@ impl Engine {
         }
     }
 
-    pub fn set_default(&mut self, flags: EngineMethod) -> Result<(), ErrorStack> {
+    pub fn set_default(&self, flags: EngineMethod) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::ENGINE_set_default(self.0, flags.0)).map(|_| ()) }
     }
 
-    pub fn init(&mut self) -> Result<(), ErrorStack> {
+    pub fn init(&self) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::ENGINE_init(self.0)).map(|_| ()) }
     }
 
     pub fn ctrl_cmd_string(
-        &mut self,
+        &self,
         command: &str,
         arg: Option<&str>,
         cmd_optional: i32,
@@ -80,7 +80,7 @@ impl Engine {
         }
     }
 
-    pub fn load_private_key(&mut self, id: &str) -> Result<PKey<Private>, ErrorStack> {
+    pub fn load_private_key(&self, id: &str) -> Result<PKey<Private>, ErrorStack> {
         let key_id = CString::new(id).unwrap();
 
         let ui_method = ptr::null_mut();
@@ -97,7 +97,7 @@ impl Engine {
         }
     }
 
-    pub fn load_public_key(&mut self, id: &str) -> Result<PKey<Public>, ErrorStack> {
+    pub fn load_public_key(&self, id: &str) -> Result<PKey<Public>, ErrorStack> {
         let key_id = CString::new(id).unwrap();
 
         let ui_method = ptr::null_mut();
@@ -114,11 +114,11 @@ impl Engine {
         }
     }
 
-    pub fn finish(&mut self) -> Result<(), ErrorStack> {
+    pub fn finish(&self) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::ENGINE_finish(self.0)).map(|_| ()) }
     }
 
-    pub fn free(&mut self) -> Result<(), ErrorStack> {
+    pub fn free(&self) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::ENGINE_free(self.0)).map(|_| ()) }
     }
 }
@@ -173,19 +173,18 @@ mod tests {
 
         const ENGINE_ID: &str = "rdrand";
 
-        let result = Engine::by_id(ENGINE_ID);
-        assert!(result.is_ok());
+        let engine_result = Engine::by_id(ENGINE_ID);
+        assert!(engine_result.is_ok());
 
-        let mut engine = result.unwrap();
-
+        let engine = engine_result.unwrap();
         assert_eq!(engine.get_id(), ENGINE_ID);
 
         println!("Engine name: {:?}", engine.get_name());
 
-        let mut result2 = engine.init();
-        assert!(result2.is_ok());
+        let mut result = engine.init();
+        assert!(result.is_ok());
 
-        result2 = engine.set_default(EngineMethod::ALL);
-        assert!(result2.is_ok());
+        result = engine.set_default(EngineMethod::ALL);
+        assert!(result.is_ok());
     }
 }
