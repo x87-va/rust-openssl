@@ -947,6 +947,17 @@ impl X509Name {
         let file = CString::new(file.as_ref().as_os_str().to_str().unwrap()).unwrap();
         unsafe { cvt_p(ffi::SSL_load_client_CA_file(file.as_ptr())).map(|p| Stack::from_ptr(p)) }
     }
+
+    from_der! {
+        /// Deserializes a DER-encoded X509 name structure.
+        ///
+        /// This corresponds to [`d2i_X509_NAME`].
+        ///
+        /// [`d2i_X509_NAME`]: https://www.openssl.org/docs/manmaster/man3/d2i_X509_NAME.html
+        from_der,
+        X509Name,
+        ffi::d2i_X509_NAME
+    }
 }
 
 impl Stackable for X509Name {
@@ -972,19 +983,8 @@ impl X509NameRef {
         }
     }
 
-    from_der! {
-        /// Deserializes a DER-encoded X509 structure.
-        ///
-        /// This corresponds to [`d2i_X509_NAME`].
-        ///
-        /// [`d2i_X509_NAME`]: https://www.openssl.org/docs/manmaster/man3/d2i_X509_NAME.html
-        from_der,
-        X509Name,
-        ffi::d2i_X509_NAME
-    }
-
     to_der! {
-        /// Serializes the name into a DER-encoded X509 NAME structure.
+        /// Serializes the certificate into a DER-encoded X509 name structure.
         ///
         /// This corresponds to [`i2d_X509_NAME`].
         ///
@@ -992,7 +992,6 @@ impl X509NameRef {
         to_der,
         ffi::i2d_X509_NAME
     }
-
 }
 
 impl fmt::Debug for X509NameRef {
