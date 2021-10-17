@@ -65,18 +65,16 @@ impl Engine {
                     ))
                     .map(|_| ())
                 }
-            },
-            None => {
-                unsafe {
-                    cvt(ffi::ENGINE_ctrl_cmd_string(
-                        self.0,
-                        cmd_name.as_ptr(),
-                        ptr::null(),
-                        cmd_optional as c_int,
-                    ))
-                    .map(|_| ())
-                }
             }
+            None => unsafe {
+                cvt(ffi::ENGINE_ctrl_cmd_string(
+                    self.0,
+                    cmd_name.as_ptr(),
+                    ptr::null(),
+                    cmd_optional as c_int,
+                ))
+                .map(|_| ())
+            },
         }
     }
 

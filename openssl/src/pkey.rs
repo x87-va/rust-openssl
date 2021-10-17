@@ -387,6 +387,8 @@ impl<T> fmt::Debug for PKey<T> {
             Id::ED25519 => "Ed25519",
             #[cfg(ossl111)]
             Id::ED448 => "Ed448",
+            Id::GOST3410_2012_256 => "GOST3410_2012_256",
+            Id::GOST3410_2012_512 => "GOST3410_2012_512",
             _ => "unknown",
         };
         fmt.debug_struct("PKey").field("algorithm", &alg).finish()
@@ -869,6 +871,52 @@ impl<T> TryFrom<PKey<T>> for Dh<T> {
 
     fn try_from(pkey: PKey<T>) -> Result<Dh<T>, ErrorStack> {
         pkey.dh()
+    }
+}
+
+foreign_type_and_impl_send_sync! {
+    type CType = ffi::EVP_PKEY_CTX;
+    fn drop = ffi::EVP_PKEY_CTX_free;
+
+    /// A public or private key context.
+    pub struct PKeyCtx;
+    /// Reference to `PKeyCtx`.
+    pub struct PKeyCtxRef;
+}
+
+impl PKeyCtx {
+    pub fn new(id: Id) -> Result<PKeyCtx, ErrorStack> {
+        unsafe {
+            let ctx_ptr = cvt_p(ffi::EVP_PKEY_CTX_new_id(id.0, ptr::null_mut()))?;
+            let ctx = PKeyCtx::from_ptr(ctx_ptr);
+            Ok(ctx)
+        }
+    }
+
+    pub fn keygen_init(&self) -> Result<(), ErrorStack> {
+        unsafe { cvt(ffi::EVP_PKEY_keygen_init(self.0)).map(|_code| ()) }
+    }
+
+    pub fn ctrl_str(&self, command: &str, argument: &str) -> Result<(), ErrorStack> {
+        unsafe {
+            let type_ = CString::new(command).unwrap();
+            let value = CString::new(argument).unwrap();
+
+            cvt(ffi::EVP_PKEY_CTX_ctrl_str(
+                self.0,
+                type_.as_ptr(),
+                value.as_ptr(),
+            ))
+            .map(|_code| ())
+        }
+    }
+
+    pub fn keygen(&self) -> Result<PKey<Private>, ErrorStack> {
+        unsafe {
+            let mut pkey_ptr = ptr::null_mut();
+            cvt(ffi::EVP_PKEY_keygen(self.0, &mut pkey_ptr))?;
+            Ok(PKey::from_ptr(pkey_ptr))
+        }
     }
 }
 

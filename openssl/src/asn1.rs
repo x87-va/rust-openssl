@@ -561,7 +561,6 @@ impl Asn1IntegerRef {
         to_der,
         ffi::i2d_ASN1_INTEGER
     }
-
 }
 
 foreign_type_and_impl_send_sync! {

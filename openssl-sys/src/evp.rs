@@ -514,6 +514,12 @@ extern "C" {
         p2: *mut c_void,
     ) -> c_int;
 
+    pub fn EVP_PKEY_CTX_ctrl_str(
+        ctx: *mut EVP_PKEY_CTX,
+        type_: *const c_char,
+        value: *const c_char,
+    ) -> c_int;
+
     pub fn EVP_PKEY_new_mac_key(
         type_: c_int,
         e: *mut ENGINE,
