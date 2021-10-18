@@ -1017,6 +1017,8 @@ impl Nid {
         Nid(ffi::NID_id_GostR3411_94_with_GostR3410_94_cc);
     pub const ID_GOSTR3411_94_WITH_GOSTR3410_2001_CC: Nid =
         Nid(ffi::NID_id_GostR3411_94_with_GostR3410_2001_cc);
+    pub const ID_GOSTR3411_2012_256: Nid = Nid(ffi::NID_id_GostR3411_2012_256);
+    pub const ID_GOSTR3411_2012_512: Nid = Nid(ffi::NID_id_GostR3411_2012_512);
     pub const ID_GOSTR3410_2001_PARAMSET_CC: Nid = Nid(ffi::NID_id_GostR3410_2001_ParamSet_cc);
     pub const ID_GOSTR3410_2012_256: Nid = Nid(ffi::NID_id_GostR3410_2012_256);
     pub const ID_GOSTR3410_2012_512: Nid = Nid(ffi::NID_id_GostR3410_2012_512);
