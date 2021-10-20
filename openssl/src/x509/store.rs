@@ -41,6 +41,7 @@ use std::mem;
 
 use crate::error::ErrorStack;
 use crate::stack::StackRef;
+use crate::x509::crl::X509CRL;
 #[cfg(any(ossl102, libressl261))]
 use crate::x509::verify::X509VerifyFlags;
 use crate::x509::{X509Object, X509};
@@ -81,6 +82,11 @@ impl X509StoreBuilderRef {
     // FIXME should take an &X509Ref
     pub fn add_cert(&mut self, cert: X509) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::X509_STORE_add_cert(self.as_ptr(), cert.as_ptr())).map(|_| ()) }
+    }
+
+    /// Adds a CRL to the certificate store.
+    pub fn add_crl(&mut self, crl: X509CRL) -> Result<(), ErrorStack> {
+        unsafe { cvt(ffi::X509_STORE_add_crl(self.as_ptr(), crl.as_ptr())).map(|_| ()) }
     }
 
     /// Load certificates from their default locations.
