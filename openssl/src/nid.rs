@@ -995,7 +995,7 @@ impl Nid {
         Nid(ffi::NID_id_GostR3410_94_CryptoPro_XchB_ParamSet);
     pub const ID_GOSTR3410_94_CRYPTOPRO_XCHC_PARAMSET: Nid =
         Nid(ffi::NID_id_GostR3410_94_CryptoPro_XchC_ParamSet);
-    pub const ID_GOSTR3410_2001_TESTPARAMSET: Nid = Nid(ffi::NID_id_GostR3410_2001_TestParamSet);
+    pub const ID_GOSTR3410_2001_TEST_PARAMSET: Nid = Nid(ffi::NID_id_GostR3410_2001_TestParamSet);
     pub const ID_GOSTR3410_2001_CRYPTOPRO_A_PARAMSET: Nid =
         Nid(ffi::NID_id_GostR3410_2001_CryptoPro_A_ParamSet);
     pub const ID_GOSTR3410_2001_CRYPTOPRO_B_PARAMSET: Nid =
@@ -1006,6 +1006,25 @@ impl Nid {
         Nid(ffi::NID_id_GostR3410_2001_CryptoPro_XchA_ParamSet);
     pub const ID_GOSTR3410_2001_CRYPTOPRO_XCHB_PARAMSET: Nid =
         Nid(ffi::NID_id_GostR3410_2001_CryptoPro_XchB_ParamSet);
+
+    pub const ID_TC26_GOST_3410_2012_256_A_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_256_paramSetA);
+    pub const ID_TC26_GOST_3410_2012_256_B_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_256_paramSetB);
+    pub const ID_TC26_GOST_3410_2012_256_C_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_256_paramSetC);
+    pub const ID_TC26_GOST_3410_2012_256_D_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_256_paramSetD);
+
+    pub const ID_TC26_GOST_3410_2012_512_TEST_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_512_paramSetTest);
+    pub const ID_TC26_GOST_3410_2012_512_A_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_512_paramSetA);
+    pub const ID_TC26_GOST_3410_2012_512_B_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_512_paramSetB);
+    pub const ID_TC26_GOST_3410_2012_512_C_PARAMSET: Nid =
+        Nid(ffi::NID_id_tc26_gost_3410_2012_512_paramSetC);
+
     pub const ID_GOSTR3410_94_A: Nid = Nid(ffi::NID_id_GostR3410_94_a);
     pub const ID_GOSTR3410_94_ABIS: Nid = Nid(ffi::NID_id_GostR3410_94_aBis);
     pub const ID_GOSTR3410_94_B: Nid = Nid(ffi::NID_id_GostR3410_94_b);

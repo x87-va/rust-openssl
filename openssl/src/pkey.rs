@@ -54,6 +54,7 @@ use crate::dh::Dh;
 use crate::dsa::Dsa;
 use crate::ec::EcKey;
 use crate::error::ErrorStack;
+use crate::nid::Nid;
 use crate::rsa::Rsa;
 use crate::symm::Cipher;
 use crate::util::{invoke_passwd_cb, CallbackState};
@@ -906,6 +907,20 @@ impl PKeyCtx {
                 self.0,
                 type_.as_ptr(),
                 value.as_ptr(),
+            ))
+            .map(|_code| ())
+        }
+    }
+
+    pub fn ctrl(&self, command: Nid, parameter: Nid) -> Result<(), ErrorStack> {
+        unsafe {
+            cvt(ffi::EVP_PKEY_CTX_ctrl(
+                self.0,
+                -1,
+                -1,
+                command.as_raw(),
+                parameter.as_raw(),
+                ptr::null_mut(),
             ))
             .map(|_code| ())
         }
