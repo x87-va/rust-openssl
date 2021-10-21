@@ -1066,3 +1066,5 @@ cfg_if! {
 }
 
 pub enum OCSP_RESPONSE {}
+
+pub enum UI_METHOD {}

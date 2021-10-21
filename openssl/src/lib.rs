@@ -143,6 +143,7 @@ pub mod dsa;
 pub mod ec;
 pub mod ecdsa;
 pub mod encrypt;
+pub mod engine;
 pub mod envelope;
 pub mod error;
 pub mod ex_data;

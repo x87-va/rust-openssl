@@ -54,6 +54,7 @@ use crate::dh::Dh;
 use crate::dsa::Dsa;
 use crate::ec::EcKey;
 use crate::error::ErrorStack;
+use crate::nid::Nid;
 use crate::rsa::Rsa;
 use crate::symm::Cipher;
 use crate::util::{invoke_passwd_cb, CallbackState};
@@ -87,6 +88,10 @@ impl Id {
     pub const X25519: Id = Id(ffi::EVP_PKEY_X25519);
     #[cfg(ossl111)]
     pub const X448: Id = Id(ffi::EVP_PKEY_X448);
+    #[cfg(ossl111)]
+    pub const GOST3410_2012_256: Id = Id(ffi::NID_id_GostR3410_2012_256);
+    #[cfg(ossl111)]
+    pub const GOST3410_2012_512: Id = Id(ffi::NID_id_GostR3410_2012_512);
 
     /// Creates a `Id` from an integer representation.
     pub fn from_raw(value: c_int) -> Id {
@@ -383,6 +388,8 @@ impl<T> fmt::Debug for PKey<T> {
             Id::ED25519 => "Ed25519",
             #[cfg(ossl111)]
             Id::ED448 => "Ed448",
+            Id::GOST3410_2012_256 => "GOST3410_2012_256",
+            Id::GOST3410_2012_512 => "GOST3410_2012_512",
             _ => "unknown",
         };
         fmt.debug_struct("PKey").field("algorithm", &alg).finish()
@@ -865,6 +872,66 @@ impl<T> TryFrom<PKey<T>> for Dh<T> {
 
     fn try_from(pkey: PKey<T>) -> Result<Dh<T>, ErrorStack> {
         pkey.dh()
+    }
+}
+
+foreign_type_and_impl_send_sync! {
+    type CType = ffi::EVP_PKEY_CTX;
+    fn drop = ffi::EVP_PKEY_CTX_free;
+
+    /// A public or private key context.
+    pub struct PKeyCtx;
+    /// Reference to `PKeyCtx`.
+    pub struct PKeyCtxRef;
+}
+
+impl PKeyCtx {
+    pub fn new(id: Id) -> Result<PKeyCtx, ErrorStack> {
+        unsafe {
+            let ctx_ptr = cvt_p(ffi::EVP_PKEY_CTX_new_id(id.0, ptr::null_mut()))?;
+            let ctx = PKeyCtx::from_ptr(ctx_ptr);
+            Ok(ctx)
+        }
+    }
+
+    pub fn keygen_init(&self) -> Result<(), ErrorStack> {
+        unsafe { cvt(ffi::EVP_PKEY_keygen_init(self.0)).map(|_code| ()) }
+    }
+
+    pub fn ctrl_str(&self, command: &str, argument: &str) -> Result<(), ErrorStack> {
+        unsafe {
+            let type_ = CString::new(command).unwrap();
+            let value = CString::new(argument).unwrap();
+
+            cvt(ffi::EVP_PKEY_CTX_ctrl_str(
+                self.0,
+                type_.as_ptr(),
+                value.as_ptr(),
+            ))
+            .map(|_code| ())
+        }
+    }
+
+    pub fn ctrl(&self, command: Nid, parameter: Nid) -> Result<(), ErrorStack> {
+        unsafe {
+            cvt(ffi::EVP_PKEY_CTX_ctrl(
+                self.0,
+                -1,
+                -1,
+                command.as_raw(),
+                parameter.as_raw(),
+                ptr::null_mut(),
+            ))
+            .map(|_code| ())
+        }
+    }
+
+    pub fn keygen(&self) -> Result<PKey<Private>, ErrorStack> {
+        unsafe {
+            let mut pkey_ptr = ptr::null_mut();
+            cvt(ffi::EVP_PKEY_keygen(self.0, &mut pkey_ptr))?;
+            Ok(PKey::from_ptr(pkey_ptr))
+        }
     }
 }
 
