@@ -167,21 +167,25 @@ pub unsafe fn X509_LOOKUP_add_dir(
 }
 
 extern "C" {
-    pub fn X509_STORE_new() -> *mut X509_STORE;
-    pub fn X509_STORE_free(store: *mut X509_STORE);
-
     pub fn X509_STORE_CTX_new() -> *mut X509_STORE_CTX;
 
     pub fn X509_STORE_CTX_free(ctx: *mut X509_STORE_CTX);
+
     pub fn X509_STORE_CTX_init(
         ctx: *mut X509_STORE_CTX,
         store: *mut X509_STORE,
         x509: *mut X509,
         chain: *mut stack_st_X509,
     ) -> c_int;
+
     pub fn X509_STORE_CTX_cleanup(ctx: *mut X509_STORE_CTX);
 
+    pub fn X509_STORE_new() -> *mut X509_STORE;
+
+    pub fn X509_STORE_free(store: *mut X509_STORE);
+
     pub fn X509_STORE_add_cert(store: *mut X509_STORE, x: *mut X509) -> c_int;
+
     pub fn X509_STORE_add_crl(store: *mut X509_STORE, x: *mut X509_CRL) -> c_int;
 
     pub fn X509_STORE_add_lookup(
@@ -190,6 +194,7 @@ extern "C" {
     ) -> *mut X509_LOOKUP;
 
     pub fn X509_STORE_set_default_paths(store: *mut X509_STORE) -> c_int;
+
     pub fn X509_STORE_set_flags(store: *mut X509_STORE, flags: c_ulong) -> c_int;
 }
 
@@ -203,7 +208,10 @@ const_ptr_api! {
 }
 extern "C" {
     pub fn X509_STORE_CTX_set_error(ctx: *mut X509_STORE_CTX, error: c_int);
+
+    pub fn X509_STORE_CTX_set0_param(ctx: *mut X509_STORE_CTX, param: *mut X509_VERIFY_PARAM);
 }
+
 cfg_if! {
     if #[cfg(ossl110)] {
         const_ptr_api! {
@@ -220,12 +228,18 @@ cfg_if! {
 
 extern "C" {
     #[cfg(any(ossl102, libressl261))]
+    pub fn X509_VERIFY_PARAM_new() -> *mut X509_VERIFY_PARAM;
+
+    #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_free(param: *mut X509_VERIFY_PARAM);
 
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_set_flags(param: *mut X509_VERIFY_PARAM, flags: c_ulong) -> c_int;
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_clear_flags(param: *mut X509_VERIFY_PARAM, flags: c_ulong) -> c_int;
+
+    #[cfg(any(ossl102, libressl261))]
+    pub fn X509_VERIFY_PARAM_set_time(param: *mut X509_VERIFY_PARAM, time: time_t);
 }
 const_ptr_api! {
     extern "C" {

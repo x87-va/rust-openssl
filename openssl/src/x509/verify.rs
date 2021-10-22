@@ -1,10 +1,12 @@
+use std::net::IpAddr;
+use std::time::{self, UNIX_EPOCH};
+
 use bitflags::bitflags;
 use foreign_types::ForeignTypeRef;
 use libc::{c_uint, c_ulong};
-use std::net::IpAddr;
 
-use crate::cvt;
 use crate::error::ErrorStack;
+use crate::{cvt, cvt_p};
 
 bitflags! {
     /// Flags used to check an `X509` certificate.
@@ -66,6 +68,12 @@ foreign_type_and_impl_send_sync! {
     pub struct X509VerifyParam;
     /// Reference to `X509VerifyParam`.
     pub struct X509VerifyParamRef;
+}
+
+impl X509VerifyParam {
+    pub fn new() -> Result<X509VerifyParam, ErrorStack> {
+        unsafe { cvt_p(ffi::X509_VERIFY_PARAM_new()).map(X509VerifyParam) }
+    }
 }
 
 impl X509VerifyParamRef {
@@ -154,6 +162,14 @@ impl X509VerifyParamRef {
                 len,
             ))
             .map(|_| ())
+        }
+    }
+
+    pub fn set_time(&mut self, time: time::SystemTime) {
+        let unix_time = time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+
+        unsafe {
+            ffi::X509_VERIFY_PARAM_set_time(self.as_ptr(), unix_time);
         }
     }
 }

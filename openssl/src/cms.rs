@@ -399,7 +399,7 @@ mod test {
         let verify_flags = CMSOptions::BINARY | CMSOptions::NOINTERN;
 
         let mut store_builder = X509StoreBuilder::new().unwrap();
-        store_builder.add_cert(ca_certificate).unwrap();
+        store_builder.add_cert(&ca_certificate).unwrap();
         let trust_store = store_builder.build();
 
         let valid = content_info

@@ -364,7 +364,7 @@ mod tests {
 
         let root_ca = include_bytes!("../test/root-ca.pem");
         let root_ca = X509::from_pem(root_ca).unwrap();
-        store_builder.add_cert(root_ca).expect("should succeed");
+        store_builder.add_cert(&root_ca).expect("should succeed");
 
         let store = store_builder.build();
 
@@ -406,7 +406,7 @@ mod tests {
 
         let root_ca = include_bytes!("../test/root-ca.pem");
         let root_ca = X509::from_pem(root_ca).unwrap();
-        store_builder.add_cert(root_ca).expect("should succeed");
+        store_builder.add_cert(&root_ca).expect("should succeed");
 
         let store = store_builder.build();
 
@@ -443,7 +443,7 @@ mod tests {
 
         let root_ca = include_bytes!("../test/root-ca.pem");
         let root_ca = X509::from_pem(root_ca).unwrap();
-        store_builder.add_cert(root_ca).expect("should succeed");
+        store_builder.add_cert(&root_ca).expect("should succeed");
 
         let pkcs7 =
             Pkcs7::sign(&cert, &pkey, &certs, message.as_bytes(), flags).expect("should succeed");

@@ -16,7 +16,6 @@ use crate::error::ErrorStack;
 pub struct Engine(*mut ffi::ENGINE);
 
 impl Engine {
-
     pub fn from_ptr(ptr: *mut ffi::ENGINE) -> Engine {
         Engine(ptr)
     }
@@ -83,7 +82,7 @@ impl Engine {
                     cmd_optional as c_int,
                 ))
                 .map(|_| ())
-            }
+            },
         }
     }
 

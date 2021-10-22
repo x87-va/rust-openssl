@@ -370,7 +370,7 @@ fn test_verify_cert() {
     let chain = Stack::new().unwrap();
 
     let mut store_bldr = X509StoreBuilder::new().unwrap();
-    store_bldr.add_cert(ca).unwrap();
+    store_bldr.add_cert(&ca).unwrap();
     let store = store_bldr.build();
 
     let mut context = X509StoreContext::new().unwrap();
@@ -391,7 +391,7 @@ fn test_verify_fails() {
     let chain = Stack::new().unwrap();
 
     let mut store_bldr = X509StoreBuilder::new().unwrap();
-    store_bldr.add_cert(ca).unwrap();
+    store_bldr.add_cert(&ca).unwrap();
     let store = store_bldr.build();
 
     let mut context = X509StoreContext::new().unwrap();
@@ -410,7 +410,7 @@ fn test_verify_fails_with_crl_flag_set_and_no_crl() {
     let chain = Stack::new().unwrap();
 
     let mut store_bldr = X509StoreBuilder::new().unwrap();
-    store_bldr.add_cert(ca).unwrap();
+    store_bldr.add_cert(&ca).unwrap();
     store_bldr.set_flags(X509VerifyFlags::CRL_CHECK).unwrap();
     let store = store_bldr.build();
 

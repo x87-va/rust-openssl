@@ -30,7 +30,7 @@
 //! let certificate: X509 = builder.build();
 //!
 //! let mut builder = X509StoreBuilder::new().unwrap();
-//! let _ = builder.add_cert(certificate);
+//! let _ = builder.add_cert(&certificate);
 //!
 //! let store: X509Store = builder.build();
 //! ```
@@ -41,10 +41,10 @@ use std::mem;
 
 use crate::error::ErrorStack;
 use crate::stack::StackRef;
-use crate::x509::crl::X509CRL;
+use crate::x509::crl::X509CRLRef;
 #[cfg(any(ossl102, libressl261))]
 use crate::x509::verify::X509VerifyFlags;
-use crate::x509::{X509Object, X509};
+use crate::x509::{X509Object, X509Ref};
 use crate::{cvt, cvt_p};
 
 foreign_type_and_impl_send_sync! {
@@ -79,13 +79,12 @@ impl X509StoreBuilder {
 
 impl X509StoreBuilderRef {
     /// Adds a certificate to the certificate store.
-    // FIXME should take an &X509Ref
-    pub fn add_cert(&mut self, cert: X509) -> Result<(), ErrorStack> {
+    pub fn add_cert(&mut self, cert: &X509Ref) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::X509_STORE_add_cert(self.as_ptr(), cert.as_ptr())).map(|_| ()) }
     }
 
     /// Adds a CRL to the certificate store.
-    pub fn add_crl(&mut self, crl: X509CRL) -> Result<(), ErrorStack> {
+    pub fn add_crl(&mut self, crl: &X509CRLRef) -> Result<(), ErrorStack> {
         unsafe { cvt(ffi::X509_STORE_add_crl(self.as_ptr(), crl.as_ptr())).map(|_| ()) }
     }
 

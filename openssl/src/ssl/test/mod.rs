@@ -73,7 +73,7 @@ fn verify_trusted_with_set_cert() {
 
     let mut store = X509StoreBuilder::new().unwrap();
     let x509 = X509::from_pem(ROOT_CERT).unwrap();
-    store.add_cert(x509).unwrap();
+    store.add_cert(&x509).unwrap();
 
     let mut client = server.client();
     client.ctx().set_verify(SslVerifyMode::PEER);
@@ -832,7 +832,7 @@ fn cert_store() {
 
     let mut client = server.client();
     let cert = X509::from_pem(ROOT_CERT).unwrap();
-    client.ctx().cert_store_mut().add_cert(cert).unwrap();
+    client.ctx().cert_store_mut().add_cert(&cert).unwrap();
     client.ctx().set_verify(SslVerifyMode::PEER);
 
     client.connect();
