@@ -61,17 +61,29 @@ impl Engine {
     ) -> Result<(), ErrorStack> {
         let cmd_name = CString::new(command).unwrap();
 
-        let arg = arg.map(|value| CString::new(value).unwrap());
-        let arg_ptr = arg.map_or(ptr::null(), |value| value.as_ptr());
+        match arg {
+            Some(value) => {
+                let cmd_arg = CString::new(value).unwrap();
 
-        unsafe {
-            cvt(ffi::ENGINE_ctrl_cmd_string(
+                unsafe {
+                    cvt(ffi::ENGINE_ctrl_cmd_string(
+                        self.0,
+                        cmd_name.as_ptr(),
+                        cmd_arg.as_ptr(),
+                        cmd_optional as c_int,
+                    ))
+                    .map(|_| ())
+                }
+            }
+            None => unsafe {
+                cvt(ffi::ENGINE_ctrl_cmd_string(
                     self.0,
                     cmd_name.as_ptr(),
-                    arg_ptr,
+                    ptr::null(),
                     cmd_optional as c_int,
                 ))
                 .map(|_| ())
+            }
         }
     }
 
