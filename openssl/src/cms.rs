@@ -10,11 +10,13 @@ use foreign_types::{ForeignType, ForeignTypeRef};
 use libc::c_uint;
 use std::ptr;
 
+use crate::asn1::Asn1OctetStringRef;
 use crate::bio::{MemBio, MemBioSlice};
 use crate::error::ErrorStack;
 use crate::pkey::{HasPrivate, PKeyRef};
 use crate::stack::StackRef;
 use crate::symm::Cipher;
+use crate::x509::store::X509StoreRef;
 use crate::x509::{X509Ref, X509};
 use crate::{cvt, cvt_p};
 
@@ -223,6 +225,28 @@ impl CmsContentInfo {
         }
     }
 
+    pub fn verify(
+        &self,
+        signers: Option<&StackRef<X509>>,
+        trust: &X509StoreRef,
+        flags: CMSOptions,
+    ) -> Result<bool, ErrorStack> {
+        unsafe {
+            let signers = signers.map_or(ptr::null_mut(), |p| p.as_ptr());
+
+            cvt(ffi::CMS_verify(
+                self.as_ptr(),
+                signers,
+                trust.as_ptr(),
+                ptr::null_mut(),
+                ptr::null_mut(),
+                flags.bits(),
+            ))?;
+
+            return Ok(true);
+        }
+    }
+
     /// Given a certificate stack `certs`, data `data`, cipher `cipher` and flags `flags`,
     /// create a CmsContentInfo struct.
     ///
@@ -246,6 +270,14 @@ impl CmsContentInfo {
             ))?;
 
             Ok(CmsContentInfo::from_ptr(cms))
+        }
+    }
+
+    pub fn get_content(&self) -> Result<&[u8], ErrorStack> {
+        unsafe {
+            let content_ptr = cvt_p(ffi::CMS_get0_content(self.as_ptr()))?;
+            let content = Asn1OctetStringRef::from_ptr(*content_ptr);
+            Ok(content.as_slice())
         }
     }
 }
@@ -329,5 +361,50 @@ mod test {
             assert_eq!(input, decrypt_with_cert_check);
             assert_eq!(input, decrypt_without_cert_check);
         }
+    }
+
+    #[test]
+    fn cms_sign_verify() {
+        use crate::x509::store::X509StoreBuilder;
+
+        // load cert with public key only
+        let pub_cert_bytes = include_bytes!("../test/cms_pubkey.der");
+        let ca_certificate = X509::from_der(pub_cert_bytes).expect("failed to load pub cert");
+
+        // load cert with private key
+        let priv_cert_bytes = include_bytes!("../test/cms.p12");
+        let pkcs12 = Pkcs12::from_der(priv_cert_bytes).expect("failed to load priv cert");
+        let key_store = pkcs12.parse("mypass").expect("failed to parse priv cert");
+
+        println!("{:?}", key_store);
+
+        // Sign
+        let input = String::from("My Message");
+
+        let sign_flags = CMSOptions::USE_KEYID | CMSOptions::NOSMIMECAP;
+
+        let content_info = CmsContentInfo::sign(
+            Some(&key_store.cert),
+            Some(&key_store.pkey),
+            None,
+            Some(input.as_bytes()),
+            sign_flags,
+        )
+        .expect("Create CMS");
+
+        // let content = content_info.get_content().expect("Get content");
+        // println!("{:?}", String::from_utf8(content.to_vec()).unwrap());
+
+        // Verify
+        let verify_flags = CMSOptions::BINARY | CMSOptions::NOINTERN;
+
+        let mut store_builder = X509StoreBuilder::new().unwrap();
+        store_builder.add_cert(ca_certificate).unwrap();
+        let trust_store = store_builder.build();
+
+        let valid = content_info
+            .verify(None, &trust_store, verify_flags)
+            .expect("Verify CMS");
+        assert!(valid);
     }
 }

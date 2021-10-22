@@ -735,6 +735,35 @@ impl Stackable for X509 {
     type StackType = ffi::stack_st_X509;
 }
 
+impl fmt::Debug for X509Ref {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let serial = match &self.serial_number().to_bn() {
+            Ok(bn) => match bn.to_hex_str() {
+                Ok(hex) => hex.to_string(),
+                Err(_) => "".to_string(),
+            },
+            Err(_) => "".to_string(),
+        };
+        let mut debug_struct = formatter.debug_struct("X509Ref");
+        debug_struct.field("serial_number", &serial);
+        debug_struct.field("signature_algorithm", &self.signature_algorithm().object());
+        debug_struct.field("issuer", &self.issuer_name());
+        debug_struct.field("subject", &self.subject_name());
+        if let Some(subject_alt_names) = &self.subject_alt_names() {
+            debug_struct.field("subject_alt_names", subject_alt_names);
+        }
+        debug_struct.field("not_before", &self.not_before());
+        debug_struct.field("not_after", &self.not_after());
+
+        if let Ok(public_key) = &self.public_key() {
+            debug_struct.field("public_key", public_key);
+        };
+        // TODO: Print extensions once they are supported on the X509 struct.
+
+        debug_struct.finish()
+    }
+}
+
 /// A context object required to construct certain `X509` extension values.
 pub struct X509v3Context<'a>(ffi::X509V3_CTX, PhantomData<(&'a X509Ref, &'a ConfRef)>);
 

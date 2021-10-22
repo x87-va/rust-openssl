@@ -597,6 +597,39 @@ impl Asn1BitStringRef {
 }
 
 foreign_type_and_impl_send_sync! {
+    type CType = ffi::ASN1_OCTET_STRING;
+    fn drop = ffi::ASN1_OCTET_STRING_free;
+    /// Sequence of bytes
+    ///
+    /// Asn1OctetString is used in [`x509`] certificates for the signature.
+    /// The bit string acts as a collection of bytes.
+    ///
+    /// [`x509`]: ../x509/struct.X509.html#method.signature
+    pub struct Asn1OctetString;
+    /// Reference to [`Asn1OctetString`]
+    ///
+    /// [`Asn1OctetString`]: struct.Asn1OctetString.html
+    pub struct Asn1OctetStringRef;
+}
+
+impl Asn1OctetStringRef {
+    /// Returns the Asn1BitString as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        unsafe { slice::from_raw_parts(ASN1_STRING_get0_data(self.as_ptr() as *mut _), self.len()) }
+    }
+
+    /// Returns the number of bytes in the string.
+    pub fn len(&self) -> usize {
+        unsafe { ffi::ASN1_STRING_length(self.as_ptr() as *const _) as usize }
+    }
+
+    /// Determines if the string is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
+foreign_type_and_impl_send_sync! {
     type CType = ffi::ASN1_OBJECT;
     fn drop = ffi::ASN1_OBJECT_free;
 

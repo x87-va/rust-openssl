@@ -60,6 +60,8 @@ extern "C" {
 
     pub fn ASN1_BIT_STRING_free(x: *mut ASN1_BIT_STRING);
 
+    pub fn ASN1_OCTET_STRING_free(x: *mut ASN1_OCTET_STRING);
+
     pub fn ASN1_STRING_free(x: *mut ASN1_STRING);
     pub fn ASN1_STRING_length(x: *const ASN1_STRING) -> c_int;
 

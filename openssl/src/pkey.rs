@@ -895,7 +895,7 @@ impl PKeyCtx {
     }
 
     pub fn keygen_init(&self) -> Result<(), ErrorStack> {
-        unsafe { cvt(ffi::EVP_PKEY_keygen_init(self.0)).map(|_code| ()) }
+        unsafe { cvt(ffi::EVP_PKEY_keygen_init(self.as_ptr())).map(|_code| ()) }
     }
 
     pub fn ctrl_str(&self, command: &str, argument: &str) -> Result<(), ErrorStack> {
@@ -904,7 +904,7 @@ impl PKeyCtx {
             let value = CString::new(argument).unwrap();
 
             cvt(ffi::EVP_PKEY_CTX_ctrl_str(
-                self.0,
+                self.as_ptr(),
                 type_.as_ptr(),
                 value.as_ptr(),
             ))
@@ -915,7 +915,7 @@ impl PKeyCtx {
     pub fn ctrl(&self, command: Nid, parameter: Nid) -> Result<(), ErrorStack> {
         unsafe {
             cvt(ffi::EVP_PKEY_CTX_ctrl(
-                self.0,
+                self.as_ptr(),
                 -1,
                 -1,
                 command.as_raw(),
@@ -929,7 +929,7 @@ impl PKeyCtx {
     pub fn keygen(&self) -> Result<PKey<Private>, ErrorStack> {
         unsafe {
             let mut pkey_ptr = ptr::null_mut();
-            cvt(ffi::EVP_PKEY_keygen(self.0, &mut pkey_ptr))?;
+            cvt(ffi::EVP_PKEY_keygen(self.as_ptr(), &mut pkey_ptr))?;
             Ok(PKey::from_ptr(pkey_ptr))
         }
     }

@@ -16,6 +16,15 @@ use crate::error::ErrorStack;
 pub struct Engine(*mut ffi::ENGINE);
 
 impl Engine {
+
+    pub fn from_ptr(ptr: *mut ffi::ENGINE) -> Engine {
+        Engine(ptr)
+    }
+
+    pub fn as_ptr(&self) -> *mut ffi::ENGINE {
+        self.0
+    }
+
     pub fn by_id(engine_id: &str) -> Result<Engine, ErrorStack> {
         let id = CString::new(engine_id).unwrap();
 
@@ -52,29 +61,17 @@ impl Engine {
     ) -> Result<(), ErrorStack> {
         let cmd_name = CString::new(command).unwrap();
 
-        match arg {
-            Some(value) => {
-                let cmd_arg = CString::new(value).unwrap();
+        let arg = arg.map(|value| CString::new(value).unwrap());
+        let arg_ptr = arg.map_or(ptr::null(), |value| value.as_ptr());
 
-                unsafe {
-                    cvt(ffi::ENGINE_ctrl_cmd_string(
-                        self.0,
-                        cmd_name.as_ptr(),
-                        cmd_arg.as_ptr(),
-                        cmd_optional as c_int,
-                    ))
-                    .map(|_| ())
-                }
-            }
-            None => unsafe {
-                cvt(ffi::ENGINE_ctrl_cmd_string(
+        unsafe {
+            cvt(ffi::ENGINE_ctrl_cmd_string(
                     self.0,
                     cmd_name.as_ptr(),
-                    ptr::null(),
+                    arg_ptr,
                     cmd_optional as c_int,
                 ))
                 .map(|_| ())
-            },
         }
     }
 

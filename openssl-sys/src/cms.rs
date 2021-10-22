@@ -83,6 +83,16 @@ extern "C" {
     ) -> *mut ::CMS_ContentInfo;
 
     #[cfg(ossl101)]
+    pub fn CMS_verify(
+        cms: *mut ::CMS_ContentInfo,
+        certs: *mut ::stack_st_X509,
+        store: *mut ::X509_STORE,
+        indata: *mut ::BIO,
+        out: *mut ::BIO,
+        flags: c_uint,
+    ) -> c_int;
+
+    #[cfg(ossl101)]
     pub fn CMS_encrypt(
         certs: *mut stack_st_X509,
         data: *mut ::BIO,
@@ -99,4 +109,7 @@ extern "C" {
         out: *mut ::BIO,
         flags: c_uint,
     ) -> c_int;
+
+    #[cfg(ossl101)]
+    pub fn CMS_get0_content(cms: *mut ::CMS_ContentInfo) -> *mut *mut ::ASN1_OCTET_STRING;
 }

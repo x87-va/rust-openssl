@@ -92,6 +92,7 @@ impl Pkcs12 {
     }
 }
 
+#[derive(Debug)]
 pub struct ParsedPkcs12 {
     pub pkey: PKey<Private>,
     pub cert: X509,
