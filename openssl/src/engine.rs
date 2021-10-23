@@ -129,6 +129,9 @@ impl Engine {
     }
 }
 
+unsafe impl Send for Engine {}
+unsafe impl Sync for Engine {}
+
 impl fmt::Debug for Engine {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "Engine{{id: {}}}", self.get_id())
