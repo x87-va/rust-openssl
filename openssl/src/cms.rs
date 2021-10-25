@@ -241,9 +241,8 @@ impl CmsContentInfo {
                 ptr::null_mut(),
                 ptr::null_mut(),
                 flags.bits(),
-            ))?;
-
-            return Ok(true);
+            ))
+            .map(|x| x == 1)
         }
     }
 
