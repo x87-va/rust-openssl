@@ -34,7 +34,7 @@ use crate::ssl::SslRef;
 use crate::stack::{Stack, StackRef, Stackable};
 use crate::string::OpensslString;
 use crate::util::{ForeignTypeExt, ForeignTypeRefExt};
-use crate::x509::verify::X509VerifyParamRef;
+use crate::x509::verify::X509VerifyParam;
 use crate::{cvt, cvt_n, cvt_p};
 
 #[cfg(any(ossl102, libressl261))]
@@ -219,8 +219,9 @@ impl X509StoreContextRef {
         }
     }
 
-    pub fn set_param(&self, param: &X509VerifyParamRef) {
+    pub fn set_param(&self, param: X509VerifyParam) {
         unsafe { ffi::X509_STORE_CTX_set0_param(self.as_ptr(), param.as_ptr()) }
+        mem::forget(param);
     }
 }
 
