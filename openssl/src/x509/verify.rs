@@ -1,9 +1,9 @@
 use std::net::IpAddr;
-use std::time::{self, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bitflags::bitflags;
 use foreign_types::ForeignTypeRef;
-use libc::{c_uint, c_ulong};
+use libc::{c_int, c_uint, c_ulong, time_t};
 
 use crate::error::ErrorStack;
 use crate::{cvt, cvt_p};
@@ -146,6 +146,7 @@ impl X509VerifyParamRef {
     pub fn set_ip(&mut self, ip: IpAddr) -> Result<(), ErrorStack> {
         unsafe {
             let mut buf = [0; 16];
+
             let len = match ip {
                 IpAddr::V4(addr) => {
                     buf[..4].copy_from_slice(&addr.octets());
@@ -156,6 +157,7 @@ impl X509VerifyParamRef {
                     16
                 }
             };
+
             cvt(ffi::X509_VERIFY_PARAM_set1_ip(
                 self.as_ptr(),
                 buf.as_ptr() as *const _,
@@ -165,11 +167,50 @@ impl X509VerifyParamRef {
         }
     }
 
-    pub fn set_time(&mut self, time: time::SystemTime) {
-        let unix_time = time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64;
+    pub fn set_time(&mut self, time: SystemTime) {
+        let unix_time = time.duration_since(UNIX_EPOCH).unwrap().as_secs() as time_t;
 
         unsafe {
             ffi::X509_VERIFY_PARAM_set_time(self.as_ptr(), unix_time);
         }
+    }
+
+    pub fn get_time(&self) -> SystemTime {
+        let unix_time = unsafe { ffi::X509_VERIFY_PARAM_get_time(self.as_ptr()) };
+        UNIX_EPOCH + Duration::from_secs(unix_time as u64)
+    }
+
+    pub fn set_depth(&mut self, depth: isize) {
+        unsafe { ffi::X509_VERIFY_PARAM_set_depth(self.as_ptr(), depth as c_int) };
+    }
+
+    pub fn get_depth(&mut self) -> isize {
+        unsafe { ffi::X509_VERIFY_PARAM_get_depth(self.as_ptr()) as isize }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_set_verify_time() {
+        let mut param = X509VerifyParam::new().unwrap();
+        assert_eq!(UNIX_EPOCH, param.get_time());
+
+        let verify_time = UNIX_EPOCH + Duration::from_secs(1950902108);
+        param.set_time(verify_time);
+
+        assert_eq!(verify_time, param.get_time());
+    }
+
+    #[test]
+    fn get_set_verify_depth() {
+        let mut param = X509VerifyParam::new().unwrap();
+        assert_eq!(-1, param.get_depth());
+
+        let depth = 2;
+        param.set_depth(depth);
+        assert_eq!(depth, param.get_depth());
     }
 }

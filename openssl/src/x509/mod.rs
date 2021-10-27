@@ -123,7 +123,7 @@ impl X509StoreContextRef {
         &mut self,
         trust: &store::X509StoreRef,
         cert: &X509Ref,
-        cert_chain: &StackRef<X509>,
+        cert_chain: Option<&StackRef<X509>>,
         with_context: F,
     ) -> Result<T, ErrorStack>
     where
@@ -139,12 +139,14 @@ impl X509StoreContextRef {
             }
         }
 
+        let chain_ptr = cert_chain.map_or(ptr::null_mut(), |ch| ch.as_ptr());
+
         unsafe {
             cvt(ffi::X509_STORE_CTX_init(
                 self.as_ptr(),
                 trust.as_ptr(),
                 cert.as_ptr(),
-                cert_chain.as_ptr(),
+                chain_ptr,
             ))?;
 
             let cleanup = Cleanup(self);
@@ -163,7 +165,7 @@ impl X509StoreContextRef {
     ///
     /// [`X509_verify_cert`]:  https://www.openssl.org/docs/man1.0.2/crypto/X509_verify_cert.html
     pub fn verify_cert(&mut self) -> Result<bool, ErrorStack> {
-        unsafe { cvt_n(ffi::X509_verify_cert(self.as_ptr())).map(|n| n != 0) }
+        unsafe { cvt_n(ffi::X509_verify_cert(self.as_ptr())).map(|n| n == 1) }
     }
 
     /// Set the error code of the context.
@@ -209,12 +211,12 @@ impl X509StoreContextRef {
     /// [`X509_STORE_CTX_get0_chain`]: https://www.openssl.org/docs/man1.1.0/crypto/X509_STORE_CTX_get0_chain.html
     pub fn chain(&self) -> Option<&StackRef<X509>> {
         unsafe {
-            let chain = X509_STORE_CTX_get0_chain(self.as_ptr());
+            let ptr = X509_STORE_CTX_get0_chain(self.as_ptr());
 
-            if chain.is_null() {
+            if ptr.is_null() {
                 None
             } else {
-                Some(StackRef::from_ptr(chain))
+                Some(StackRef::from_ptr(ptr))
             }
         }
     }

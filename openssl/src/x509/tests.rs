@@ -367,7 +367,6 @@ fn test_verify_cert() {
     let cert = X509::from_pem(cert).unwrap();
     let ca = include_bytes!("../../test/root-ca.pem");
     let ca = X509::from_pem(ca).unwrap();
-    let chain = Stack::new().unwrap();
 
     let mut store_bldr = X509StoreBuilder::new().unwrap();
     store_bldr.add_cert(&ca).unwrap();
@@ -375,10 +374,10 @@ fn test_verify_cert() {
 
     let mut context = X509StoreContext::new().unwrap();
     assert!(context
-        .init(&store, &cert, &chain, |c| c.verify_cert())
+        .init(&store, &cert, None, |c| c.verify_cert())
         .unwrap());
     assert!(context
-        .init(&store, &cert, &chain, |c| c.verify_cert())
+        .init(&store, &cert, None, |c| c.verify_cert())
         .unwrap());
 }
 
@@ -388,7 +387,6 @@ fn test_verify_fails() {
     let cert = X509::from_pem(cert).unwrap();
     let ca = include_bytes!("../../test/alt_name_cert.pem");
     let ca = X509::from_pem(ca).unwrap();
-    let chain = Stack::new().unwrap();
 
     let mut store_bldr = X509StoreBuilder::new().unwrap();
     store_bldr.add_cert(&ca).unwrap();
@@ -396,7 +394,7 @@ fn test_verify_fails() {
 
     let mut context = X509StoreContext::new().unwrap();
     assert!(!context
-        .init(&store, &cert, &chain, |c| c.verify_cert())
+        .init(&store, &cert, None, |c| c.verify_cert())
         .unwrap());
 }
 
@@ -407,7 +405,6 @@ fn test_verify_fails_with_crl_flag_set_and_no_crl() {
     let cert = X509::from_pem(cert).unwrap();
     let ca = include_bytes!("../../test/root-ca.pem");
     let ca = X509::from_pem(ca).unwrap();
-    let chain = Stack::new().unwrap();
 
     let mut store_bldr = X509StoreBuilder::new().unwrap();
     store_bldr.add_cert(&ca).unwrap();
@@ -417,7 +414,7 @@ fn test_verify_fails_with_crl_flag_set_and_no_crl() {
     let mut context = X509StoreContext::new().unwrap();
     assert_eq!(
         context
-            .init(&store, &cert, &chain, |c| {
+            .init(&store, &cert, None, |c| {
                 c.verify_cert()?;
                 Ok(c.error())
             })

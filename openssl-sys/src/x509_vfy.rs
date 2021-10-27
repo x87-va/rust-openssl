@@ -180,6 +180,12 @@ extern "C" {
 
     pub fn X509_STORE_CTX_cleanup(ctx: *mut X509_STORE_CTX);
 
+    pub fn X509_STORE_CTX_set_error(ctx: *mut X509_STORE_CTX, error: c_int);
+
+    pub fn X509_STORE_CTX_set0_param(ctx: *mut X509_STORE_CTX, param: *mut X509_VERIFY_PARAM);
+}
+
+extern "C" {
     pub fn X509_STORE_new() -> *mut X509_STORE;
 
     pub fn X509_STORE_free(store: *mut X509_STORE);
@@ -206,11 +212,6 @@ const_ptr_api! {
         pub fn X509_STORE_CTX_get_current_cert(ctx: #[const_ptr_if(ossl300)] X509_STORE_CTX) -> *mut X509;
     }
 }
-extern "C" {
-    pub fn X509_STORE_CTX_set_error(ctx: *mut X509_STORE_CTX, error: c_int);
-
-    pub fn X509_STORE_CTX_set0_param(ctx: *mut X509_STORE_CTX, param: *mut X509_VERIFY_PARAM);
-}
 
 cfg_if! {
     if #[cfg(ossl110)] {
@@ -235,32 +236,43 @@ extern "C" {
 
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_set_flags(param: *mut X509_VERIFY_PARAM, flags: c_ulong) -> c_int;
+
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_clear_flags(param: *mut X509_VERIFY_PARAM, flags: c_ulong) -> c_int;
 
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_set_time(param: *mut X509_VERIFY_PARAM, time: time_t);
-}
-const_ptr_api! {
-    extern "C" {
-        #[cfg(any(ossl102, libressl261))]
-        pub fn X509_VERIFY_PARAM_get_flags(param: #[const_ptr_if(ossl300)] X509_VERIFY_PARAM) -> c_ulong;
-    }
-}
 
-extern "C" {
+    #[cfg(any(ossl102, libressl261))]
+    pub fn X509_VERIFY_PARAM_set_depth(ctx: *mut X509_VERIFY_PARAM, depth: c_int);
+
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_set1_host(
         param: *mut X509_VERIFY_PARAM,
         name: *const c_char,
         namelen: size_t,
     ) -> c_int;
+
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_set_hostflags(param: *mut X509_VERIFY_PARAM, flags: c_uint);
+
     #[cfg(any(ossl102, libressl261))]
     pub fn X509_VERIFY_PARAM_set1_ip(
         param: *mut X509_VERIFY_PARAM,
         ip: *const c_uchar,
         iplen: size_t,
     ) -> c_int;
+}
+
+const_ptr_api! {
+    extern "C" {
+        #[cfg(any(ossl102, libressl261))]
+        pub fn X509_VERIFY_PARAM_get_flags(param: #[const_ptr_if(ossl300)] X509_VERIFY_PARAM) -> c_ulong;
+
+        #[cfg(any(ossl102, libressl261))]
+        pub fn X509_VERIFY_PARAM_get_time(param: #[const_ptr_if(ossl102)] X509_VERIFY_PARAM) -> time_t;
+
+        #[cfg(any(ossl102, libressl261))]
+        pub fn X509_VERIFY_PARAM_get_depth(param: #[const_ptr_if(ossl102)] X509_VERIFY_PARAM) -> c_int;
+    }
 }
