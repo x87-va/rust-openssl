@@ -183,6 +183,8 @@ extern "C" {
     pub fn X509_STORE_CTX_set_error(ctx: *mut X509_STORE_CTX, error: c_int);
 
     pub fn X509_STORE_CTX_set0_param(ctx: *mut X509_STORE_CTX, param: *mut X509_VERIFY_PARAM);
+
+    pub fn X509_STORE_CTX_get0_param(ctx: *mut X509_STORE_CTX) -> *mut X509_VERIFY_PARAM;
 }
 
 extern "C" {

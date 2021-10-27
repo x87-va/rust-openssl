@@ -34,7 +34,7 @@ use crate::ssl::SslRef;
 use crate::stack::{Stack, StackRef, Stackable};
 use crate::string::OpensslString;
 use crate::util::{ForeignTypeExt, ForeignTypeRefExt};
-use crate::x509::verify::X509VerifyParam;
+use crate::x509::verify::{X509VerifyParam, X509VerifyParamRef};
 use crate::{cvt, cvt_n, cvt_p};
 
 #[cfg(any(ossl102, libressl261))]
@@ -105,41 +105,19 @@ impl X509StoreContextRef {
     }
 
     /// Initializes this context with the given certificate, certificates chain and certificate
-    /// store. After initializing the context, the `with_context` closure is called with the prepared
-    /// context. As long as the closure is running, the context stays initialized and can be used
-    /// to e.g. verify a certificate. The context will be cleaned up, after the closure finished.
-    ///
+    /// store. 
     /// * `trust` - The certificate store with the trusted certificates.
     /// * `cert` - The certificate that should be verified.
     /// * `cert_chain` - The certificates chain.
-    /// * `with_context` - The closure that is called with the initialized context.
-    ///
-    /// This corresponds to [`X509_STORE_CTX_init`] before calling `with_context` and to
-    /// [`X509_STORE_CTX_cleanup`] after calling `with_context`.
     ///
     /// [`X509_STORE_CTX_init`]:  https://www.openssl.org/docs/man1.0.2/crypto/X509_STORE_CTX_init.html
-    /// [`X509_STORE_CTX_cleanup`]:  https://www.openssl.org/docs/man1.0.2/crypto/X509_STORE_CTX_cleanup.html
-    pub fn init<F, T>(
+    pub fn init(
         &mut self,
         trust: &store::X509StoreRef,
         cert: &X509Ref,
         cert_chain: Option<&StackRef<X509>>,
-        with_context: F,
-    ) -> Result<T, ErrorStack>
-    where
-        F: FnOnce(&mut X509StoreContextRef) -> Result<T, ErrorStack>,
-    {
-        struct Cleanup<'a>(&'a mut X509StoreContextRef);
-
-        impl<'a> Drop for Cleanup<'a> {
-            fn drop(&mut self) {
-                unsafe {
-                    ffi::X509_STORE_CTX_cleanup(self.0.as_ptr());
-                }
-            }
-        }
-
-        let chain_ptr = cert_chain.map_or(ptr::null_mut(), |ch| ch.as_ptr());
+    ) -> Result<(), ErrorStack> {
+        let chain_ptr = cert_chain.map_or(ptr::null_mut(), |chain| chain.as_ptr());
 
         unsafe {
             cvt(ffi::X509_STORE_CTX_init(
@@ -147,11 +125,13 @@ impl X509StoreContextRef {
                 trust.as_ptr(),
                 cert.as_ptr(),
                 chain_ptr,
-            ))?;
-
-            let cleanup = Cleanup(self);
-            with_context(cleanup.0)
+            )).map(|_| ())
         }
+    }
+
+    /// [`X509_STORE_CTX_cleanup`]:  https://www.openssl.org/docs/man1.0.2/crypto/X509_STORE_CTX_cleanup.html
+    pub fn cleanup(&mut self) {
+        unsafe { ffi::X509_STORE_CTX_cleanup(self.as_ptr()) };
     }
 
     /// Verifies the stored certificate.
@@ -224,6 +204,11 @@ impl X509StoreContextRef {
     pub fn set_param(&self, param: X509VerifyParam) {
         unsafe { ffi::X509_STORE_CTX_set0_param(self.as_ptr(), param.as_ptr()) }
         mem::forget(param);
+    }
+
+    pub fn get_param(&self) -> &X509VerifyParamRef {
+        let ptr = unsafe { ffi::X509_STORE_CTX_get0_param(self.as_ptr()) };
+        unsafe { X509VerifyParamRef::from_ptr(ptr) }
     }
 }
 

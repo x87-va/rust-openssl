@@ -373,12 +373,8 @@ fn test_verify_cert() {
     let store = store_bldr.build();
 
     let mut context = X509StoreContext::new().unwrap();
-    assert!(context
-        .init(&store, &cert, None, |c| c.verify_cert())
-        .unwrap());
-    assert!(context
-        .init(&store, &cert, None, |c| c.verify_cert())
-        .unwrap());
+    context.init(&store, &cert, None).unwrap();
+    assert!(context.verify_cert().unwrap());
 }
 
 #[test]
@@ -393,9 +389,8 @@ fn test_verify_fails() {
     let store = store_bldr.build();
 
     let mut context = X509StoreContext::new().unwrap();
-    assert!(!context
-        .init(&store, &cert, None, |c| c.verify_cert())
-        .unwrap());
+    context.init(&store, &cert, None).unwrap();
+    assert!(!context.verify_cert().unwrap());
 }
 
 #[test]
@@ -412,16 +407,9 @@ fn test_verify_fails_with_crl_flag_set_and_no_crl() {
     let store = store_bldr.build();
 
     let mut context = X509StoreContext::new().unwrap();
-    assert_eq!(
-        context
-            .init(&store, &cert, None, |c| {
-                c.verify_cert()?;
-                Ok(c.error())
-            })
-            .unwrap()
-            .error_string(),
-        "unable to get certificate CRL"
-    )
+    context.init(&store, &cert, None).unwrap();
+    assert!(!context.verify_cert().unwrap());
+    assert_eq!(context.error().error_string(), "unable to get certificate CRL");
 }
 
 #[cfg(ossl110)]
