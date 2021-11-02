@@ -112,4 +112,8 @@ extern "C" {
 
     #[cfg(ossl101)]
     pub fn CMS_get0_content(cms: *mut ::CMS_ContentInfo) -> *mut *mut ::ASN1_OCTET_STRING;
+
+    pub fn CMS_get1_certs(cms: *mut ::CMS_ContentInfo) -> *mut ::stack_st_X509;
+
+    pub fn CMS_get1_crls(cms: *mut ::CMS_ContentInfo) -> *mut ::stack_st_X509_CRL;
 }

@@ -14,10 +14,11 @@ use crate::asn1::Asn1OctetStringRef;
 use crate::bio::{MemBio, MemBioSlice};
 use crate::error::ErrorStack;
 use crate::pkey::{HasPrivate, PKeyRef};
-use crate::stack::StackRef;
+use crate::stack::{Stack, StackRef};
 use crate::symm::Cipher;
 use crate::x509::store::X509StoreRef;
 use crate::x509::{X509Ref, X509};
+use crate::x509::crl::X509CRL;
 use crate::{cvt, cvt_p};
 
 bitflags! {
@@ -277,6 +278,30 @@ impl CmsContentInfo {
             let content_ptr = cvt_p(ffi::CMS_get0_content(self.as_ptr()))?;
             let content = Asn1OctetStringRef::from_ptr(*content_ptr);
             Ok(content.as_slice())
+        }
+    }
+
+    pub fn get_certs(&self) -> Option<Stack<X509>> {
+        unsafe {
+            let stack_ptr = ffi::CMS_get1_certs(self.as_ptr());
+            if stack_ptr.is_null() {
+                return None;
+            }
+
+            let stack = Stack::from_ptr(stack_ptr);
+            return Some(stack);
+        }
+    }
+
+    pub fn get_crls(&self) -> Option<Stack<X509CRL>> {
+        unsafe {
+            let stack_ptr = ffi::CMS_get1_crls(self.as_ptr());
+            if stack_ptr.is_null() {
+                return None;
+            }
+
+            let stack = Stack::from_ptr(stack_ptr);
+            return Some(stack);
         }
     }
 }

@@ -1,4 +1,5 @@
 use crate::cvt_p;
+use crate::x509::Stackable;
 
 foreign_type_and_impl_send_sync! {
     type CType = ffi::X509_CRL;
@@ -34,4 +35,8 @@ impl X509CRL {
         X509CRL,
         ffi::d2i_X509_CRL
     }
+}
+
+impl Stackable for X509CRL {
+    type StackType = ffi::stack_st_X509_CRL;
 }
