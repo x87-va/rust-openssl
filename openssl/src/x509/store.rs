@@ -43,7 +43,7 @@ use crate::error::ErrorStack;
 use crate::stack::StackRef;
 use crate::x509::crl::X509CRLRef;
 #[cfg(any(ossl102, libressl261))]
-use crate::x509::verify::X509VerifyFlags;
+use crate::x509::verify::{X509VerifyFlags, X509VerifyParamRef};
 use crate::x509::{X509Object, X509Ref};
 use crate::{cvt, cvt_p};
 
@@ -198,6 +198,11 @@ impl X509StoreRef {
     /// Get a reference to the cache of certificates in this store.
     pub fn objects(&self) -> &StackRef<X509Object> {
         unsafe { StackRef::from_ptr(X509_STORE_get0_objects(self.as_ptr())) }
+    }
+
+    /// Sets the verification parameters for store.
+    pub fn set_param(&mut self, param: &X509VerifyParamRef) -> Result<(), ErrorStack> {
+        unsafe { cvt(ffi::X509_STORE_set1_param(self.as_ptr(), param.as_ptr())).map(|_| ()) }
     }
 }
 

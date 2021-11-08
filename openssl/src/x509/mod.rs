@@ -105,7 +105,7 @@ impl X509StoreContextRef {
     }
 
     /// Initializes this context with the given certificate, certificates chain and certificate
-    /// store. 
+    /// store.
     /// * `trust` - The certificate store with the trusted certificates.
     /// * `cert` - The certificate that should be verified.
     /// * `cert_chain` - The certificates chain.
@@ -125,7 +125,8 @@ impl X509StoreContextRef {
                 trust.as_ptr(),
                 cert.as_ptr(),
                 chain_ptr,
-            )).map(|_| ())
+            ))
+            .map(|_| ())
         }
     }
 

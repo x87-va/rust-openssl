@@ -409,7 +409,10 @@ fn test_verify_fails_with_crl_flag_set_and_no_crl() {
     let mut context = X509StoreContext::new().unwrap();
     context.init(&store, &cert, None).unwrap();
     assert!(!context.verify_cert().unwrap());
-    assert_eq!(context.error().error_string(), "unable to get certificate CRL");
+    assert_eq!(
+        context.error().error_string(),
+        "unable to get certificate CRL"
+    );
 }
 
 #[cfg(ossl110)]

@@ -16,9 +16,9 @@ use crate::error::ErrorStack;
 use crate::pkey::{HasPrivate, PKeyRef};
 use crate::stack::{Stack, StackRef};
 use crate::symm::Cipher;
+use crate::x509::crl::X509CRL;
 use crate::x509::store::X509StoreRef;
 use crate::x509::{X509Ref, X509};
-use crate::x509::crl::X509CRL;
 use crate::{cvt, cvt_p};
 
 bitflags! {

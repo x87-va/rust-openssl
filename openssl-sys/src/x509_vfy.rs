@@ -204,6 +204,8 @@ extern "C" {
     pub fn X509_STORE_set_default_paths(store: *mut X509_STORE) -> c_int;
 
     pub fn X509_STORE_set_flags(store: *mut X509_STORE, flags: c_ulong) -> c_int;
+
+    pub fn X509_STORE_set1_param(store: *mut X509_STORE, param: *mut X509_VERIFY_PARAM) -> c_int;
 }
 
 const_ptr_api! {
