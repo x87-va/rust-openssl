@@ -84,7 +84,6 @@ extern "C" {
     pub fn ASN1_INTEGER_set(dest: *mut ASN1_INTEGER, value: c_long) -> c_int;
     pub fn BN_to_ASN1_INTEGER(bn: *const BIGNUM, ai: *mut ASN1_INTEGER) -> *mut ASN1_INTEGER;
     pub fn ASN1_INTEGER_to_BN(ai: *const ASN1_INTEGER, bn: *mut BIGNUM) -> *mut BIGNUM;
-    pub fn i2d_ASN1_INTEGER(x: *mut ASN1_INTEGER, buf: *mut *mut u8) -> c_int;
 
     pub fn ASN1_TIME_set_string(s: *mut ASN1_TIME, str: *const c_char) -> c_int;
     #[cfg(ossl111)]
@@ -93,6 +92,8 @@ extern "C" {
 
 const_ptr_api! {
     extern "C" {
+        pub fn i2d_ASN1_INTEGER(x: #[const_ptr_if(ossl300)] ASN1_INTEGER, buf: *mut *mut u8) -> c_int;
+
         pub fn ASN1_STRING_to_UTF8(out: *mut *mut c_uchar, s: #[const_ptr_if(any(ossl110, libressl280))] ASN1_STRING) -> c_int;
     }
 }

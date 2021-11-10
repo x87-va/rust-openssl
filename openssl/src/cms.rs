@@ -393,11 +393,11 @@ mod test {
 
         // load cert with public key only
         let pub_cert_bytes = include_bytes!("../test/cms_pubkey.der");
-        let ca_certificate = X509::from_der(pub_cert_bytes).expect("failed to load pub cert");
+        let ca_certificate = X509::from_der(pub_cert_bytes).expect("Load public key");
 
         // load cert with private key
         let priv_cert_bytes = include_bytes!("../test/cms.p12");
-        let pkcs12 = Pkcs12::from_der(priv_cert_bytes).expect("failed to load priv cert");
+        let pkcs12 = Pkcs12::from_der(priv_cert_bytes).expect("Load PKCS#12 keystore");
         let key_store = pkcs12.parse("mypass").expect("failed to parse priv cert");
 
         println!("{:?}", key_store);

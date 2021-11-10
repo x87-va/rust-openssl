@@ -183,8 +183,6 @@ extern "C" {
     pub fn X509_STORE_CTX_set_error(ctx: *mut X509_STORE_CTX, error: c_int);
 
     pub fn X509_STORE_CTX_set0_param(ctx: *mut X509_STORE_CTX, param: *mut X509_VERIFY_PARAM);
-
-    pub fn X509_STORE_CTX_get0_param(ctx: *mut X509_STORE_CTX) -> *mut X509_VERIFY_PARAM;
 }
 
 extern "C" {
@@ -204,12 +202,13 @@ extern "C" {
     pub fn X509_STORE_set_default_paths(store: *mut X509_STORE) -> c_int;
 
     pub fn X509_STORE_set_flags(store: *mut X509_STORE, flags: c_ulong) -> c_int;
-
-    pub fn X509_STORE_set1_param(store: *mut X509_STORE, param: *mut X509_VERIFY_PARAM) -> c_int;
 }
 
 const_ptr_api! {
     extern "C" {
+        pub fn X509_STORE_CTX_get0_param(ctx: #[const_ptr_if(ossl300)] X509_STORE_CTX) -> *mut X509_VERIFY_PARAM;
+        pub fn X509_STORE_set1_param(store: *mut X509_STORE, param: #[const_ptr_if(ossl300)] X509_VERIFY_PARAM) -> c_int;
+
         pub fn X509_STORE_CTX_get_ex_data(ctx: #[const_ptr_if(ossl300)] X509_STORE_CTX, idx: c_int) -> *mut c_void;
         pub fn X509_STORE_CTX_get_error(ctx: #[const_ptr_if(ossl300)] X509_STORE_CTX) -> c_int;
         pub fn X509_STORE_CTX_get_error_depth(ctx: #[const_ptr_if(ossl300)] X509_STORE_CTX) -> c_int;
