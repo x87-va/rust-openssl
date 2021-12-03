@@ -28,6 +28,24 @@ pub const PKCS7_REUSE_DIGEST: c_int = 0x8000;
 #[cfg(not(any(ossl101, ossl102, libressl)))]
 pub const PKCS7_NO_DUAL_CONTENT: c_int = 0x10000;
 
+#[repr(C)]
+pub struct PKCS7_ISSUER_AND_SERIAL {
+    pub issuer: *mut X509_NAME,
+    pub serial: *mut ASN1_INTEGER,
+}
+
+#[repr(C)]
+pub struct PKCS7_SIGNER_INFO {
+    pub version: *mut ASN1_INTEGER, // version 1
+    pub issuer_and_serial: *mut PKCS7_ISSUER_AND_SERIAL,
+    pub digest_alg: *mut X509_ALGOR,
+    pub auth_attr: *mut stack_st_X509_ATTRIBUTE, // [ 0 ]
+    pub digest_enc_alg: *mut X509_ALGOR,
+    pub enc_digest: *mut ASN1_OCTET_STRING,
+    pub unauth_attr: *mut stack_st_X509_ATTRIBUTE, // [ 1 ]
+    pub pkey: *mut EVP_PKEY,                       // The private key to sign with
+}
+
 extern "C" {
     pub fn d2i_PKCS7(a: *mut *mut PKCS7, pp: *mut *const c_uchar, length: c_long) -> *mut PKCS7;
 }
