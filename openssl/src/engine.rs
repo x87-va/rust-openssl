@@ -180,7 +180,7 @@ mod tests {
     fn test_engine_by_id() {
         ffi::init();
 
-        const ENGINE_ID: &str = "rdrand";
+        const ENGINE_ID: &str = "gost";
 
         let engine_result = Engine::by_id(ENGINE_ID);
         assert!(engine_result.is_ok());

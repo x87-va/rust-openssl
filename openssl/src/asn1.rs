@@ -563,6 +563,20 @@ impl Asn1IntegerRef {
     }
 }
 
+impl fmt::Debug for Asn1IntegerRef {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let value = match self.to_bn() {
+            Ok(bn) => match bn.to_hex_str() {
+                Ok(hex) => hex.to_string(),
+                Err(_) => "".to_string(),
+            },
+            Err(_) => "".to_string(),
+        };
+
+        fmt.write_str(&value)
+    }
+}
+
 foreign_type_and_impl_send_sync! {
     type CType = ffi::ASN1_BIT_STRING;
     fn drop = ffi::ASN1_BIT_STRING_free;
