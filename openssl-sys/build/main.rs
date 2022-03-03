@@ -2,8 +2,6 @@
 
 extern crate autocfg;
 extern crate cc;
-#[cfg(feature = "vendored")]
-extern crate openssl_src;
 extern crate pkg_config;
 #[cfg(target_env = "msvc")]
 extern crate vcpkg;
@@ -16,8 +14,6 @@ use std::path::{Path, PathBuf};
 mod cfgs;
 
 mod find_normal;
-#[cfg(feature = "vendored")]
-mod find_vendored;
 
 #[derive(PartialEq)]
 enum Version {
@@ -46,84 +42,85 @@ fn env(name: &str) -> Option<OsString> {
 }
 
 fn find_openssl(target: &str) -> (PathBuf, PathBuf) {
-    #[cfg(feature = "vendored")]
-    {
-        // vendor if the feature is present, unless
-        // OPENSSL_NO_VENDOR exists and isn't `0`
-        if env("OPENSSL_NO_VENDOR").map_or(true, |s| s == "0") {
-            return find_vendored::get_openssl(target);
-        }
-    }
     find_normal::get_openssl(target)
 }
 
 fn main() {
     check_rustc_versions();
 
-    let target = env::var("TARGET").unwrap();
+    // let target = env::var("TARGET").unwrap();
 
-    let (lib_dir, include_dir) = find_openssl(&target);
+    // let (lib_dir, include_dir) = find_openssl(&target);
 
-    if !Path::new(&lib_dir).exists() {
-        panic!(
-            "OpenSSL library directory does not exist: {}",
-            lib_dir.to_string_lossy()
-        );
-    }
-    if !Path::new(&include_dir).exists() {
-        panic!(
-            "OpenSSL include directory does not exist: {}",
-            include_dir.to_string_lossy()
-        );
-    }
+    // if !Path::new(&lib_dir).exists() {
+    //     panic!(
+    //         "OpenSSL library directory does not exist: {}",
+    //         lib_dir.to_string_lossy()
+    //     );
+    // }
+    // if !Path::new(&include_dir).exists() {
+    //     panic!(
+    //         "OpenSSL include directory does not exist: {}",
+    //         include_dir.to_string_lossy()
+    //     );
+    // }
 
-    println!(
-        "cargo:rustc-link-search=native={}",
-        lib_dir.to_string_lossy()
-    );
-    println!("cargo:include={}", include_dir.to_string_lossy());
+    let frameworks_path = "/Library/Frameworks";
 
-    let version = validate_headers(&[include_dir]);
+    println!("cargo:rustc-link-search=framework={}", frameworks_path);
 
-    let libs_env = env("OPENSSL_LIBS");
-    let libs = match libs_env.as_ref().and_then(|s| s.to_str()) {
-        Some(v) => {
-            if v.is_empty() {
-                vec![]
-            } else {
-                v.split(':').collect()
-            }
-        }
-        None => match version {
-            Version::Openssl10x if target.contains("windows") => vec!["ssleay32", "libeay32"],
-            Version::Openssl3xx | Version::Openssl11x if target.contains("windows-msvc") => {
-                vec!["libssl", "libcrypto"]
-            }
-            _ => vec!["ssl", "crypto"],
-        },
-    };
+    // println!(
+    //     "cargo:rustc-link-search=native={}",
+    //     lib_dir.to_string_lossy()
+    // );
 
-    let kind = determine_mode(Path::new(&lib_dir), &libs);
+    // println!("cargo:include={}", include_dir.to_string_lossy());
+    let include_dir = Path::new("");
+
+    let version = validate_headers(&[include_dir.to_path_buf()]);
+
+    // let libs_env = env("OPENSSL_LIBS");
+    // let libs = match libs_env.as_ref().and_then(|s| s.to_str()) {
+    //     Some(v) => {
+    //         if v.is_empty() {
+    //             vec![]
+    //         } else {
+    //             v.split(':').collect()
+    //         }
+    //     }
+    //     None => match version {
+    //         Version::Openssl10x if target.contains("windows") => vec!["ssleay32", "libeay32"],
+    //         Version::Openssl3xx | Version::Openssl11x if target.contains("windows-msvc") => {
+    //             vec!["libssl", "libcrypto"]
+    //         }
+    //         _ => vec!["ssl", "crypto"],
+    //     },
+    // };
+    let libs = vec!["openssl"];
+
+    // let kind = determine_mode(Path::new(&lib_dir), &libs);
+    let kind = "framework";
+
     for lib in libs.into_iter() {
         println!("cargo:rustc-link-lib={}={}", kind, lib);
     }
 
     // https://github.com/openssl/openssl/pull/15086
-    if version == Version::Openssl3xx
-        && kind == "static"
-        && env::var("CARGO_CFG_TARGET_OS").unwrap() == "linux"
-        && env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32"
-    {
-        println!("cargo:rustc-link-lib=dylib=atomic");
-    }
+    // if version == Version::Openssl3xx
+    //     && kind == "static"
+    //     && env::var("CARGO_CFG_TARGET_OS").unwrap() == "linux"
+    //     && env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap() == "32"
+    // {
+    //     println!("cargo:rustc-link-lib=dylib=atomic");
+    // }
 
-    if kind == "static" && target.contains("windows") {
-        println!("cargo:rustc-link-lib=dylib=gdi32");
-        println!("cargo:rustc-link-lib=dylib=user32");
-        println!("cargo:rustc-link-lib=dylib=crypt32");
-        println!("cargo:rustc-link-lib=dylib=ws2_32");
-        println!("cargo:rustc-link-lib=dylib=advapi32");
-    }
+    // if kind == "static" && target.contains("windows") {
+    //     println!("cargo:rustc-link-lib=dylib=gdi32");
+    //     println!("cargo:rustc-link-lib=dylib=user32");
+    //     println!("cargo:rustc-link-lib=dylib=crypt32");
+    //     println!("cargo:rustc-link-lib=dylib=ws2_32");
+    //     println!("cargo:rustc-link-lib=dylib=advapi32");
+    // }
 }
 
 fn check_rustc_versions() {
@@ -151,10 +148,17 @@ fn validate_headers(include_dirs: &[PathBuf]) -> Version {
     // as our own #[cfg] directives. That way the `ossl10x.rs` bindings can
     // account for compile differences and such.
     println!("cargo:rerun-if-changed=build/expando.c");
+
     let mut gcc = cc::Build::new();
-    for include_dir in include_dirs {
-        gcc.include(include_dir);
-    }
+
+    // for include_dir in include_dirs {
+    //     gcc.include(include_dir);
+    // }
+
+    let frameworks_path = "/Library/Frameworks";
+
+    gcc.flag(format!("-F{}", frameworks_path).as_str());
+
     let expanded = match gcc.file("build/expando.c").try_expand() {
         Ok(expanded) => expanded,
         Err(e) => {
@@ -184,11 +188,13 @@ See rust-openssl README for more information:
             );
         }
     };
+
     let expanded = String::from_utf8(expanded).unwrap();
 
     let mut enabled = vec![];
     let mut openssl_version = None;
     let mut libressl_version = None;
+
     for line in expanded.lines() {
         let line = line.trim();
 
@@ -196,6 +202,7 @@ See rust-openssl README for more information:
         let new_openssl_prefix = "RUST_VERSION_NEW_OPENSSL_";
         let libressl_prefix = "RUST_VERSION_LIBRESSL_";
         let conf_prefix = "RUST_CONF_";
+
         if line.starts_with(openssl_prefix) {
             let version = &line[openssl_prefix.len()..];
             openssl_version = Some(parse_version(version));
